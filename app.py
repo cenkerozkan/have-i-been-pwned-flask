@@ -1,8 +1,11 @@
 from flask import Flask
 from markupsafe import escape
+
 from util.logger import get_logger
+from route.credential_list_routes import credential_list_blueprint
 
 app = Flask(__name__)
+app.register_blueprint(credential_list_blueprint)
 
 @app.route("/")
 def hello_world():
