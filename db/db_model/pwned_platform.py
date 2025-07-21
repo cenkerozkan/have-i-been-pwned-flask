@@ -8,7 +8,7 @@ class PwnedPlatform(db.Model):
     # Columns
     id = db.Column(db.Integer, primary_key=True)
     email_id = db.Column(db.Integer, db.ForeignKey("emails.id"), nullable=False)
-    site = db.Column(db.String, nullable=False)
+    domain = db.Column(db.String, nullable=False)
     breach_date = db.Column(db.String)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
 
