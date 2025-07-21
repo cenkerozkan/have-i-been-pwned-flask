@@ -1,3 +1,4 @@
 /.venv/
 /.idea/
 /db/hibp.sqlite3
+/.env
