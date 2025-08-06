@@ -9,7 +9,7 @@ from pprint import pprint
 from decorators.sinlgeton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
 from util.logger import get_logger
-from model.hibp_breached_account_model import HibpBreachedAccountModel
+from db.cst_data_model.hibp_breached_account_model import HibpBreachedAccountModel
 
 load_dotenv()
 

@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, Response
 from markupsafe import escape
 
 from db.db import db
@@ -8,6 +8,7 @@ from util.logger import get_logger
 from route.credential_list_routes import credential_list_blueprint
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+logger = get_logger(__name__)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'db', 'hibp.sqlite3')}"
