@@ -9,12 +9,11 @@ from pprint import pprint
 from decorators.sinlgeton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
 from util.logger import get_logger
-from db.cst_data_model.hibp_breached_account_model import HibpBreachedAccountModel
 
 load_dotenv()
 
 @singleton
-class HaveIBeenPwnedExecutor:
+class HaveIBeenPwnedRequestExecutor:
     _API_VERSION: str = "v3"
     _BASE_URL: str = f"https://haveibeenpwned.com/api/{_API_VERSION}"
     _logger = get_logger(__name__)
@@ -36,7 +35,7 @@ class HaveIBeenPwnedExecutor:
             cls,
             email: str,
             truncate_response: bool = False,
-    ) -> HibpBreachedAccountModel:
+    ) -> dict:
         """
         Retrieves breached account information for a given email address.
         :param email: The email address to check for breaches.
@@ -49,8 +48,8 @@ class HaveIBeenPwnedExecutor:
         request_url: str = f"{cls._BASE_URL}/breachedaccount/{email}?truncateResponse={truncate_response}"
         headers: dict = {"hibp-api-key": os.getenv("HIBP_API_KEY")}
         response: Response = requests.get(request_url, headers=headers)
-        pprint(response.json())
+        return response.json()
 
 if __name__ == '__main__':
-    obj = HaveIBeenPwnedExecutor()
-    obj.get_breached_accounts(email="cen_kan@yahoo.com.tr")
+    obj = HaveIBeenPwnedRequestExecutor()
+    pprint(obj.get_breached_accounts(email="cen_kan@yahoo.com.tr"))
