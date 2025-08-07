@@ -10,7 +10,9 @@ class PwnedPlatform(db.Model):
     email_id = db.Column(db.Integer, db.ForeignKey("emails.id"), nullable=False)
     domain = db.Column(db.String, nullable=False)
     breach_date = db.Column(db.String)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    created_at = db.Column(db.DateTime, nullable=True, default=datetime.now())
+    descripiton = db.Column(db.String, nullable=True)
+    is_verified = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relationships
     email = db.relationship("Email", back_populates="breaches")
