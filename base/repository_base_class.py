@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 class RepositoryBaseClass(ABC):
 
     @abstractmethod
-    def insert_one(self, document):
+    def insert_one(self, model):
         raise NotImplementedError
 
     @abstractmethod
-    def insert_many(self, documents):
+    def insert_many(self, models):
         raise NotImplementedError
 
     @abstractmethod
@@ -15,9 +15,9 @@ class RepositoryBaseClass(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update_one(self, document):
+    def update_one(self, model):
         raise NotImplementedError
 
     @abstractmethod
-    def update_many(self, document):
+    def update_many(self, models):
         raise NotImplementedError
