@@ -5,3 +5,4 @@ A mini hobby project, a system that periodically checks the e-mail addresses I s
 - [ ] Implement DB Repositories on top of Flask-SQLAlchemy
 - [ ] Implement Flask Cronjob for have-i-been-pwned requests.
 - [ ] Implement swagger documentation for the API.
+- [ ] Handle pydantic exceptison in router layer later.
