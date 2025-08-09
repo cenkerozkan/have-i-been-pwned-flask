@@ -21,3 +21,7 @@ class RepositoryBaseClass(ABC):
     @abstractmethod
     def update_many(self, models):
         raise NotImplementedError
+
+    @abstractmethod
+    def delete_one(self, model):
+        raise NotImplementedError
