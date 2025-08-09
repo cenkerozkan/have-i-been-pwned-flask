@@ -1,14 +1,15 @@
 from db.db import db
-from db.db_models.user import User
+from db.model import User
 from base.repository_base_class import RepositoryBaseClass
 from decorators.sinlgeton import singleton
 from util.logger import get_logger
 
-logger = get_logger(__name__)
-
 
 @singleton
 class UserRepository(RepositoryBaseClass):
+    def __init__(self):
+        self._logger = get_logger(__name__)
+
     def insert_one(self, model: User) -> bool:
         try:
             db.session.add(model)
@@ -16,7 +17,7 @@ class UserRepository(RepositoryBaseClass):
             return True
         except Exception as e:
             db.session.rollback()
-            logger.exception(f"user_repository.insert_one failed: {e}")
+            self._logger.exception(f"user_repository.insert_one failed: {e}")
             return False
 
     def insert_many(self, models: list[User]) -> bool:
@@ -26,7 +27,7 @@ class UserRepository(RepositoryBaseClass):
             return True
         except Exception as e:
             db.session.rollback()
-            logger.exception(f"user_repository.insert_many failed: {e}")
+            self._logger.exception(f"user_repository.insert_many failed: {e}")
             return False
 
     def get_all(self):
@@ -39,7 +40,7 @@ class UserRepository(RepositoryBaseClass):
             return True
         except Exception as e:
             db.session.rollback()
-            logger.exception(f"user_repository.update_one failed: {e}")
+            self._logger.exception(f"user_repository.update_one failed: {e}")
             return False
 
     def update_many(self, models: list[User]) -> bool:
@@ -50,7 +51,7 @@ class UserRepository(RepositoryBaseClass):
             return True
         except Exception as e:
             db.session.rollback()
-            logger.exception(f"user_repository.update_many failed: {e}")
+            self._logger.exception(f"user_repository.update_many failed: {e}")
             return False
 
     def delete_one(self, model: User) -> bool:
@@ -60,5 +61,5 @@ class UserRepository(RepositoryBaseClass):
             return True
         except Exception as e:
             db.session.rollback()
-            logger.exception(f"user_repository.delete_one failed: {e}")
+            self._logger.exception(f"user_repository.delete_one failed: {e}")
             return False

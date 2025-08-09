@@ -2,7 +2,7 @@ from logging import Logger
 
 from repository.user_repository import UserRepository
 from decorators.sinlgeton import singleton
-from db.db_models.user import User
+from db.model.user import User
 from util.logger import get_logger
 
 @singleton
@@ -21,3 +21,4 @@ class UserService:
             self
     ) -> bool:
         new_user = User()
+        return False

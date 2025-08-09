@@ -8,6 +8,7 @@ from scheduler.scheduler import scheduler
 from util.logger import get_logger
 from route.credential_list_routes import credential_list_blueprint
 from route.user_routes import user_routes_blueprint
+from service.user_service import UserService
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 logger = get_logger(__name__)
@@ -26,7 +27,6 @@ scheduler.start()
 with app.app_context():
     db.create_all()
 
-
 app.register_blueprint(user_routes_blueprint)
 app.register_blueprint(credential_list_blueprint)
 
@@ -37,6 +37,11 @@ def hello_world():
 @app.route("/<name>")
 def hello_name(name):
     return name
+
+@app.route("/create_dummy_user", methods=["GET"])
+def create_dummy_user():
+    user_service = UserService()
+    user_service.create_dummy_user()
 
 if __name__ == "__main__":
     app.run(debug=True)

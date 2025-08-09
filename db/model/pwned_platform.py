@@ -14,6 +14,3 @@ class PwnedPlatform(db.Model):
     created_at = db.Column(db.DateTime, nullable=True, default=datetime.now())
     descripiton = db.Column(db.String, nullable=True)
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
-
-    # Relationships
-    email = db.relationship("Email", back_populates="breaches")
