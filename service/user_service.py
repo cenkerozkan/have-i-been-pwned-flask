@@ -13,7 +13,7 @@ class UserService:
 
     def create_dummy_user(self):
         self._logger.info("Creating dummy user")
-        dum_user = User(email="<EMAIL>", password="<PASSWORD>")
+        dum_user = User(email="example@example.com", password="example")
         self._db.insert_one(dum_user)
         self._logger.info("Created dummy user")
 

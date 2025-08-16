@@ -9,6 +9,10 @@ from util.logger import get_logger
 class UserRepository(RepositoryBaseClass):
     def __init__(self):
         self._logger = get_logger(__name__)
+        self._logger.info("Creating user repository")
+
+    def is_table_empty(self):
+        return db.session.query(User.id).first() is None
 
     def insert_one(self, model: User) -> bool:
         try:

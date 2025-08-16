@@ -1,47 +1,98 @@
 import os
-
-from flask import Flask, Response
-from markupsafe import escape
-
+from flask import Flask, request, Response
 from db.db import db
 from scheduler.scheduler import scheduler
 from util.logger import get_logger
 from route.credential_list_routes import credential_list_blueprint
 from route.user_routes import user_routes_blueprint
 from service.user_service import UserService
+from model.response_model import ResponseModel
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+from repository.user_repository import UserRepository
+from repository.email_repository import EmailRepository
+from repository.pwned_platform_repository import PwnedPlatformRepository
+
 logger = get_logger(__name__)
 
-app = Flask(__name__)
+def create_app(config: dict | None = None) -> Flask:
+    app = Flask(__name__)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config.update(
+        SQLALCHEMY_DATABASE_URI=f"sqlite:///{os.path.join(basedir, 'db', 'hibp.sqlite3')}",
+        SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    )
+    if config:
+        app.config.update(config)
 
-# Start SQLAlchemy extension
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'db', 'hibp.sqlite3')}"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db.init_app(app)
+    # Extensions
+    logger.info("Initializing app with config")
+    db.init_app(app)
+    scheduler.init_app(app)
 
-# Start APScheduler extension
-scheduler.init_app(app)
-scheduler.start()
+    # Blueprints
+    logger.info("Registering blueprint")
+    app.register_blueprint(user_routes_blueprint)
+    app.register_blueprint(credential_list_blueprint)
 
-with app.app_context():
-    db.create_all()
+    with app.app_context():
+        db.create_all()
+        scheduler.start()
+        UserRepository()
+        EmailRepository()
+        PwnedPlatformRepository()
 
-app.register_blueprint(user_routes_blueprint)
-app.register_blueprint(credential_list_blueprint)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello World!</p>"
+    @app.before_request
+    def block_until_user_exists():
+        is_users_empty: bool = UserRepository().is_table_empty()
+        logger.info(f"is_users_empty: {is_users_empty}")
+        if request.endpoint == "create_dummy_user" and is_users_empty:
+            return None
 
-@app.route("/<name>")
-def hello_name(name):
-    return name
+        if is_users_empty:
+            return Response(
+                response= str(ResponseModel(
+                    success=False,
+                    message="You have to create an account first!",
+                    data=None,
+                    error="",).model_dump()),
+                status=401,
+                mimetype="application/json",
+            )
 
-@app.route("/create_dummy_user", methods=["GET"])
-def create_dummy_user():
-    user_service = UserService()
-    user_service.create_dummy_user()
+        if request.endpoint == "create_dummy_user" and not is_users_empty:
+            return Response(
+                response=str(ResponseModel(
+                    success=False,
+                    message="There is already a user.",
+                    data=None,
+                    error=""
+                ).model_dump()),
+                status=409,
+                mimetype="application/json"
+            )
+
+    # Routes
+    @app.get("/")
+    def hello_world():
+        return "<p>Hello World!</p>"
+
+    @app.get("/<name>")
+    def hello_name(name: str):
+        return name
+
+    @app.get("/create_dummy_user")
+    def create_dummy_user():
+        user_service = UserService()
+        user_service.create_dummy_user()
+        return {"message": "dummy user created"}
+
+    return app
+
+
+# WSGI entrypoint (Gunicorn/Heroku: `web: gunicorn app:app`)
+app = create_app()
 
 if __name__ == "__main__":
+    # Local dev: `python app.py`
     app.run(debug=True)
