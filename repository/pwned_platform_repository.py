@@ -1,8 +1,8 @@
 from decorators.sinlgeton import singleton
 from util.logger import get_logger
 from db.db import db
+from db.model.pwned_platform import PwnedPlatform
 from base.repository_base_class import RepositoryBaseClass
-from db.custom_data_model.hibp_breached_account_model import HibpBreachedAccountModel
 
 @singleton
 class PwnedPlatformRepository(RepositoryBaseClass):
@@ -11,19 +11,56 @@ class PwnedPlatformRepository(RepositoryBaseClass):
         self._logger.info("Creating pwned platform repository")
 
     def insert_one(self, model) -> bool:
-        pass
+        try:
+            db.session.add(model)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"pwned_platform_repository.insert_one failed: {e}")
+            return False
 
-    def insert_many(self, models) -> bool:
-        pass
+    def insert_many(self, models: list[PwnedPlatform]) -> bool:
+        try:
+            for model in models:
+                db.session.add(model)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"pwned_platform_repository.insert_many failed: {e}")
+            return False
 
-    def get_all(self) -> list[HibpBreachedAccountModel]:
-        pass
+    def get_all(self): # TODO: Find the type that alchemy returns
+        return PwnedPlatform.query.all()
 
     def update_one(self, model) -> bool:
-        pass
+        try:
+            db.session.merge(model)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"pwned_platform_repository.update_one failed: {e}")
+            return False
 
     def update_many(self, models):
-        return super().update_many(models)
+        try:
+            for model in models:
+                db.session.merge(model)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"pwned_platform_repository.update_many failed: {e}")
+            return False
 
     def delete_one(self, model) -> bool:
-        pass
+        try:
+            db.session.delete(model)
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"pwned_platform_repository.delete_one failed: {e}")
+            return False

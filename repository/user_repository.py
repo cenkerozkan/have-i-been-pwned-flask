@@ -34,7 +34,7 @@ class UserRepository(RepositoryBaseClass):
             self._logger.exception(f"user_repository.insert_many failed: {e}")
             return False
 
-    def get_all(self):
+    def get_all(self): # TODO: Find the type that alchemy returns
         return User.query.all()
 
     def update_one(self, model: User) -> bool:

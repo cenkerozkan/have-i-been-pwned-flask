@@ -12,6 +12,8 @@ from repository.user_repository import UserRepository
 from repository.email_repository import EmailRepository
 from repository.pwned_platform_repository import PwnedPlatformRepository
 
+from util.have_i_been_pwned_request_executor import HaveIBeenPwnedRequestExecutor
+
 logger = get_logger(__name__)
 
 def create_app(config: dict | None = None) -> Flask:
@@ -35,11 +37,17 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(credential_list_blueprint)
 
     with app.app_context():
+        # Extensions.
         db.create_all()
         scheduler.start()
+
+        # Repositories
         UserRepository()
         EmailRepository()
         PwnedPlatformRepository()
+
+        # Utilities
+        HaveIBeenPwnedRequestExecutor()
 
 
     @app.before_request
@@ -51,14 +59,13 @@ def create_app(config: dict | None = None) -> Flask:
 
         if is_users_empty:
             return Response(
-                response= str(ResponseModel(
+                response=str(ResponseModel(
                     success=False,
                     message="You have to create an account first!",
                     data=None,
                     error="",).model_dump()),
                 status=401,
-                mimetype="application/json",
-            )
+                mimetype="application/json")
 
         if request.endpoint == "create_dummy_user" and not is_users_empty:
             return Response(
@@ -69,8 +76,7 @@ def create_app(config: dict | None = None) -> Flask:
                     error=""
                 ).model_dump()),
                 status=409,
-                mimetype="application/json"
-            )
+                mimetype="application/json")
 
     # Routes
     @app.get("/")
