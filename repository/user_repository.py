@@ -34,8 +34,19 @@ class UserRepository(RepositoryBaseClass):
             self._logger.exception(f"user_repository.insert_many failed: {e}")
             return False
 
-    def get_all(self): # TODO: Find the type that alchemy returns
-        return User.query.all()
+    def get_one_by_email(self, email: str) -> User | None:
+        try:
+            user = db.session.query(User).filter(User.email == email).first()
+            print(type(user))
+            return user
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"user_repository.get_one_by_id failed: {e}")
+            return None
+
+    def get_all(self) -> list[User]:
+        users = User.query.all()
+        return users
 
     def update_one(self, model: User) -> bool:
         try:

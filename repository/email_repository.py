@@ -31,7 +31,7 @@ class EmailRepository(RepositoryBaseClass):
             self._logger.exception(f"email_repository.insert_many() falied: {e}")
             return False
 
-    def get_all(self): # TODO: Find the type that alchemy returns
+    def get_all(self) -> list[Email]:
         return Email.query.all()
 
     def update_one(self, email: Email) -> bool:

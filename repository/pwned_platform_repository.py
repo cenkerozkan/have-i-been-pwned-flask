@@ -31,7 +31,7 @@ class PwnedPlatformRepository(RepositoryBaseClass):
             self._logger.exception(f"pwned_platform_repository.insert_many failed: {e}")
             return False
 
-    def get_all(self): # TODO: Find the type that alchemy returns
+    def get_all(self) -> list[PwnedPlatform]:
         return PwnedPlatform.query.all()
 
     def update_one(self, model) -> bool:
