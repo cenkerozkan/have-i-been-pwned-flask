@@ -8,6 +8,7 @@ from pprint import pprint
 
 from decorators.sinlgeton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
+from exceptions.hibp_could_not_be_verified_exception import HibpCouldNotBeVerifiedException
 from util.logger import get_logger
 
 load_dotenv()
@@ -35,19 +36,21 @@ class HaveIBeenPwnedRequestExecutor:
             cls,
             email: str,
             truncate_response: bool = False,
-    ) -> dict:
+    ) -> dict | None:
         """
         Retrieves breached account information for a given email address.
         :param email: The email address to check for breaches.
         :param truncate_response: If True, the response will be truncated to reduce data size.
-        :return: An instance of HibpBreachedAccountModel containing breach details.
+        :return: An dictionary of api result containing breach details.
         """
         hibp_key: str = os.getenv("HIBP_API_KEY")
         if not hibp_key:
-            raise NoHibpKeyFoundException("HIBP_KEY environment variable not set")
+            raise NoHibpKeyFoundException()
         request_url: str = f"{cls._BASE_URL}/breachedaccount/{email}?truncateResponse={truncate_response}"
         headers: dict = {"hibp-api-key": os.getenv("HIBP_API_KEY")}
         response: Response = requests.get(request_url, headers=headers)
+        if response.status_code == 401:
+            raise HibpCouldNotBeVerifiedException()
         return response.json()
 
 if __name__ == '__main__':
