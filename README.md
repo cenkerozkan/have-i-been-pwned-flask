@@ -3,10 +3,10 @@ A mini hobby project, a system that periodically checks the e-mail addresses I s
 
 # TODO:
 - [x] Implement DB Repositories on top of Flask-SQLAlchemy
-- [ ] Implement user account registration with Flask-JWT Extended
+- [x] Implement user account registration with Flask-JWT Extended
 - [ ] Implement Flask Cronjob for have-i-been-pwned requests.
 - [ ] Implement swagger documentation for the API.
-- [ ] Handle pydantic exception in router layer later.
+- [x] Handle pydantic exception in router layer later.
 - [ ] Implement custom data models for repository returns.
 - [ ] Learn SQLAlchemy Exceptions, divide them into custom exceptions.
 - [ ] Detail the exception handlers at the router layer.
