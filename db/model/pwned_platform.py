@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from sqlalchemy.orm import relationship
 from ..db import db
 
 class PwnedPlatform(db.Model):
@@ -7,10 +7,17 @@ class PwnedPlatform(db.Model):
 
     # Columns
     id = db.Column(db.Integer, primary_key=True)
-    email_id = db.Column(db.Integer, db.ForeignKey("emails.id"), nullable=False)
+    email_id = db.Column(
+        db.Integer,
+        db.ForeignKey("emails.id", ondelete="CASCADE"),  # cascade at DB level
+        nullable=False
+    )
     title = db.Column(db.String, nullable=True)
     domain = db.Column(db.String, nullable=False)
     breach_date = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, nullable=True, default=datetime.now())
     descripiton = db.Column(db.String, nullable=True)
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
+
+    # Relationships
+    email = relationship("Email", back_populates="pwned_platforms")
