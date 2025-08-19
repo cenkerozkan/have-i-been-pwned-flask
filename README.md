@@ -8,3 +8,5 @@ A mini hobby project, a system that periodically checks the e-mail addresses I s
 - [ ] Implement swagger documentation for the API.
 - [ ] Handle pydantic exception in router layer later.
 - [ ] Implement custom data models for repository returns.
+- [ ] Learn SQLAlchemy Exceptions, divide them into custom exceptions.
+- [ ] Detail the exception handlers at the router layer.
