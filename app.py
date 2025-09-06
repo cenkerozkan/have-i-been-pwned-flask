@@ -14,7 +14,7 @@ from model.response_model import ResponseModel
 from repository.user_repository import UserRepository
 from repository.email_repository import EmailRepository
 from repository.pwned_platform_repository import PwnedPlatformRepository
-from util.hibp_client import HaveIBeenPwnedRequestExecutor
+from util.hibp_client import HibpClient
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -53,7 +53,7 @@ def create_app(config: dict | None = None) -> Flask:
         PwnedPlatformRepository()
 
         # Utilities
-        HaveIBeenPwnedRequestExecutor()
+        HibpClient()
 
 
     @app.before_request
