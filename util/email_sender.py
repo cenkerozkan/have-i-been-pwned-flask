@@ -1,8 +1,9 @@
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from flask_mail import Mail, Message
 from dotenv import load_dotenv
+from flask import Flask
 
 from decorators.singleton import singleton
 from util.logger import get_logger
@@ -13,12 +14,12 @@ load_dotenv()
 @singleton
 class EmailSender:
     _logger = get_logger(__name__)
-    _mail = None
+    _mail: Optional[Mail] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._logger.debug("Initializing EmailSender")
         
-    def init_app(self, app):
+    def init_app(self, app: Flask) -> None:
         app.config.update(
             MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
             MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
@@ -43,10 +44,10 @@ class EmailSender:
             return False
             
         try:
-            subject = f"ALERT: New Security Breaches Detected"
+            subject: str = f"ALERT: New Security Breaches Detected"
             
             # Build the email body
-            body = "The following new breaches have been detected:\n\n"
+            body: str = "The following new breaches have been detected:\n\n"
             for site in breached_sites:
                 body += f"- {site.title} ({site.breach_date}): {site.domain}\n"
                 body += f"  Description: {site.description}\n"
@@ -54,7 +55,7 @@ class EmailSender:
             
             body += "\nPlease consider changing your passwords for these services."
             
-            msg = Message(
+            msg: Message = Message(
                 subject=subject,
                 recipients=[recipient_email],
                 body=body

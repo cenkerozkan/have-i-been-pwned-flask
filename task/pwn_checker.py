@@ -12,16 +12,15 @@ from model.hibp_breached_site_model import HibpBreachedSiteModel
 from util.logger import get_logger
 
 class PwnChecker:
-    def __init__(self):
+    def __init__(self) -> None:
         self._logger = get_logger(__name__)
         self._hibp_client = HibpClient()
         self._email_repository = EmailRepository()
         self._pwned_platform_repository = PwnedPlatformRepository()
         self._notification_service = NotificationService()
-        # Time to wait between checking emails (in seconds)
-        self._rate_limit_wait_time = 120  # 2 minutes
+        self._rate_limit_wait_time: int = 120
 
-    def _get_all_emails(self):
+    def _get_all_emails(self) -> List[Email]:
         return self._email_repository.get_all()
         
     def _check_email_for_breaches(self, email: Email) -> Optional[List[HibpBreachedSiteModel]]:
@@ -48,7 +47,7 @@ class PwnChecker:
             }
             
             # Filter out breaches that already exist in the database
-            new_breaches = []
+            new_breaches: List[HibpBreachedSiteModel] = []
             for breach in breach_results:
                 breach_key = (breach.name, breach.added_date.isoformat())
                 if breach_key not in existing_breach_keys:
@@ -79,7 +78,7 @@ class PwnChecker:
             if not breaches:
                 return True
                 
-            pwned_platforms = []
+            pwned_platforms: List[PwnedPlatform] = []
             for breach in breaches:
                 # Convert HibpBreachedSiteModel to PwnedPlatform model
                 pwned_platform = PwnedPlatform(
@@ -137,20 +136,20 @@ class PwnChecker:
             self._logger.error(f"Error sending notification for {email.email}: {str(e)}")
             return False
 
-    def run(self):
+    def run(self) -> None:
         """Run the breach check for all emails"""
         self._logger.info("Starting breach check for all emails")
-        emails = self._get_all_emails()
+        emails: list[Email] = self._get_all_emails()
         
         for i, email in enumerate(emails):
             self._logger.info(f"Processing email {i+1}/{len(emails)}: {email.email}")
             
             # Check for new breaches
-            new_breaches = self._check_email_for_breaches(email)
+            new_breaches: Optional[List[HibpBreachedSiteModel]] = self._check_email_for_breaches(email)
             
             if new_breaches:
                 # Save new breaches to database
-                save_result = self._save_breaches(email, new_breaches)
+                save_result: bool = self._save_breaches(email, new_breaches)
                 
                 # Send notification if save was successful
                 if save_result:
