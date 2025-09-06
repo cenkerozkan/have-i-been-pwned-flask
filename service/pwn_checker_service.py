@@ -1,5 +1,5 @@
 from decorators.singleton import singleton
-from util.have_i_been_pwned_request_executor import HaveIBeenPwnedRequestExecutor
+from util.hibp_client import HaveIBeenPwnedRequestExecutor
 
 @singleton
 class PwnCheckerService:

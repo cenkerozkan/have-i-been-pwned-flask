@@ -1,4 +1,4 @@
-from util.have_i_been_pwned_request_executor import HaveIBeenPwnedRequestExecutor
+from util.hibp_client import HaveIBeenPwnedRequestExecutor
 from repository.email_repository import EmailRepository
 from repository.pwned_platform_repository import PwnedPlatformRepository
 

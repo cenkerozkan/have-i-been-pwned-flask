@@ -14,7 +14,7 @@ from model.response_model import ResponseModel
 from repository.user_repository import UserRepository
 from repository.email_repository import EmailRepository
 from repository.pwned_platform_repository import PwnedPlatformRepository
-from util.have_i_been_pwned_request_executor import HaveIBeenPwnedRequestExecutor
+from util.hibp_client import HaveIBeenPwnedRequestExecutor
 
 load_dotenv()
 logger = get_logger(__name__)
