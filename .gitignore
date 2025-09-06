@@ -2,3 +2,7 @@
 /.idea/
 /db/hibp.sqlite3
 /.env
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
