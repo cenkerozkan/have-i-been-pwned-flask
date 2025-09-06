@@ -1,11 +1,11 @@
 from pydantic import ValidationError
 from flask import Blueprint, request, jsonify, Response
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from model.user_route_models import(
     CreateNewUserModel,
-    UserCredentials
+    UserCredentials,
+    ChangePasswordModel
 )
 
 from model.response_model import ResponseModel
@@ -70,6 +70,48 @@ def login() -> Response:
                 data=result.get("data"),
                 error=result.get("error"),
             )),
+            status=200,
+            mimetype='application/json',
+        )
+
+    except ValidationError as e:
+        return Response(
+            response=str(ResponseModel(
+                success=False,
+                message="Wrong JSON Format!",
+                data=None,
+                error=str(e)
+            ).model_dump()),
+            status=422,
+            mimetype='application/json'
+        )
+
+    except Exception as e:
+        return Response(
+            response=str(ResponseModel(
+                success=False,
+                message="An unknown error occurred.",
+                data=None,
+                error=str(e)
+            ).model_dump()),
+            status=500,
+            mimetype='application/json'
+        )
+
+@user_routes_blueprint.route('/user_routes/change_password', methods=['POST'])
+def change_password() -> Response:
+    try:
+        password_data = ChangePasswordModel(**request.get_json())
+        service = UserService()
+        result: dict = service.change_password(password_data.user_name, password_data)
+        
+        return Response(
+            response=str(ResponseModel(
+                success=result.get("success"),
+                message=result.get("message"),
+                data=result.get("data"),
+                error=result.get("error"),
+            ).model_dump()),
             status=200,
             mimetype='application/json',
         )

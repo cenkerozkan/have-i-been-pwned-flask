@@ -10,3 +10,8 @@ class CreateNewUserModel(BaseModel):
 class UserCredentials(BaseModel):
     email: str
     password: str
+
+
+class ChangePasswordModel(BaseModel):
+    user_name: str
+    password: str

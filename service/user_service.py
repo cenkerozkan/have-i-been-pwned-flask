@@ -4,7 +4,7 @@ from flask_jwt_extended import create_access_token
 from sqlalchemy.exc import IntegrityError
 
 from exceptions.no_user_found_exception import NoUserFoundException
-from model.user_route_models import CreateNewUserModel, UserCredentials
+from model.user_route_models import CreateNewUserModel, UserCredentials, ChangePasswordModel
 from repository.user_repository import UserRepository
 from decorators.singleton import singleton
 from db.model.user import User
@@ -84,4 +84,39 @@ class UserService:
             result["message"] = "Failed to login"
             result["error"] = str(e)
 
+        return result
+
+    def change_password(
+        self,
+        user_name: str,
+        password_data: ChangePasswordModel,
+    ) -> dict:
+        result: dict = {"success": False, "message": "", "data": {}, "error": ""}
+        try:
+            # Get user by username
+            user: User = self._db.get_one_by_username(user_name)
+            
+            # Update password
+            user.password = password_data.password
+            
+            # Save changes
+            is_updated: bool = self._db.update_one(user)
+            
+            if is_updated:
+                result["success"] = True
+                result["message"] = "Password successfully changed"
+            else:
+                result["success"] = False
+                result["message"] = "Failed to change password"
+                
+        except NoUserFoundException as e:
+            result["success"] = False
+            result["message"] = "No user found with this username"
+            result["error"] = str(e)
+            
+        except Exception as e:
+            result["success"] = False
+            result["message"] = "Failed to change password"
+            result["error"] = str(e)
+            
         return result

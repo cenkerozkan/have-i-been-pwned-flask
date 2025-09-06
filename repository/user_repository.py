@@ -94,3 +94,18 @@ class UserRepository(RepositoryBaseClass):
             db.session.rollback()
             self._logger.exception(f"user_repository.delete_one failed: {e}")
             return False
+
+    def get_one_by_username(self, user_name: str) -> User:
+        try:
+            user = db.session.query(User).filter(
+                User.user_name == user_name
+            ).first()
+
+            if not user:
+                raise NoUserFoundException()
+            return user
+
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"user_repository.get_one_by_username failed: {e}")
+            raise
