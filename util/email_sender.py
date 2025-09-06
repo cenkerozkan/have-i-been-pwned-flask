@@ -1,0 +1,69 @@
+import os
+from typing import List, Optional
+
+from flask_mail import Mail, Message
+from dotenv import load_dotenv
+
+from decorators.singleton import singleton
+from util.logger import get_logger
+from model.hibp_breached_site_model import HibpBreachedSiteModel
+
+load_dotenv()
+
+@singleton
+class EmailSender:
+    _logger = get_logger(__name__)
+    _mail = None
+
+    def __init__(self):
+        self._logger.debug("Initializing EmailSender")
+        
+    def init_app(self, app):
+        app.config.update(
+            MAIL_SERVER=os.getenv("MAIL_SERVER", "smtp.gmail.com"),
+            MAIL_PORT=int(os.getenv("MAIL_PORT", 587)),
+            MAIL_USE_TLS=os.getenv("MAIL_USE_TLS", "True").lower() == "true",
+            MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
+            MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
+            MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER")
+        )
+        self._mail = Mail(app)
+        self._logger.info("Email sender initialized with app context")
+
+    def send_breach_notification(self, recipient_email: str, breached_sites: List[HibpBreachedSiteModel]) -> bool:
+        """
+        Send email notification about new breaches
+        
+        :param recipient_email: Email address to send notification to
+        :param breached_sites: List of HibpBreachedSiteModel objects containing breach information
+        :return: True if email sent successfully, False otherwise
+        """
+        if not self._mail:
+            self._logger.error("Mail not initialized. Call init_app first.")
+            return False
+            
+        try:
+            subject = f"ALERT: New Security Breaches Detected"
+            
+            # Build the email body
+            body = "The following new breaches have been detected:\n\n"
+            for site in breached_sites:
+                body += f"- {site.title} ({site.breach_date}): {site.domain}\n"
+                body += f"  Description: {site.description}\n"
+                body += f"  Data compromised: {', '.join(site.data_classes)}\n\n"
+            
+            body += "\nPlease consider changing your passwords for these services."
+            
+            msg = Message(
+                subject=subject,
+                recipients=[recipient_email],
+                body=body
+            )
+            
+            self._mail.send(msg)
+            self._logger.info(f"Breach notification sent to {recipient_email}")
+            return True
+            
+        except Exception as e:
+            self._logger.error(f"Failed to send breach notification: {str(e)}")
+            return False

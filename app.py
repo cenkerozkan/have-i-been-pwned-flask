@@ -15,6 +15,7 @@ from repository.user_repository import UserRepository
 from repository.email_repository import EmailRepository
 from repository.pwned_platform_repository import PwnedPlatformRepository
 from util.hibp_client import HibpClient
+from util.email_sender import EmailSender
 
 load_dotenv()
 logger = get_logger(__name__)
@@ -36,6 +37,7 @@ def create_app(config: dict | None = None) -> Flask:
     db.init_app(app)
     scheduler.init_app(app)
     jwt.init_app(app)
+    EmailSender().init_app(app)
 
     # Blueprints
     logger.info("Registering blueprint")
@@ -85,6 +87,11 @@ def create_app(config: dict | None = None) -> Flask:
                 ).model_dump()),
                 status=409,
                 mimetype="application/json")
+
+    @app.before_request
+    def log_request_info():
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        logger.info(f"Request: {request.method} {request.path} from IP: {ip}")
 
     # Routes
     @app.get("/")

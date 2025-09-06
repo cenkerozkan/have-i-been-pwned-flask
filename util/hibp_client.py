@@ -1,5 +1,4 @@
 import os
-from logging import Logger
 from typing import Optional, List
 
 import requests
@@ -9,7 +8,7 @@ from dotenv import load_dotenv
 from decorators.singleton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
 from exceptions.hibp_could_not_be_verified_exception import HibpCouldNotBeVerifiedException
-from model.breach_check_model import HibpBreachedSiteModel
+from model.hibp_breached_site_model import HibpBreachedSiteModel
 from util.logger import get_logger
 
 load_dotenv()
@@ -17,7 +16,7 @@ load_dotenv()
 @singleton
 class HibpClient:
     _API_VERSION: str = "v3"
-    _BASE_URL: str = f"https://haveibeenpwned.com/api/{{_API_VERSION}}"
+    _BASE_URL: str = f"https://haveibeenpwned.com/api/{_API_VERSION}"
     _logger = get_logger(__name__)
 
     def __init__(self):
@@ -56,7 +55,7 @@ class HibpClient:
         try:
             self._logger.debug(f"Sending request to: {request_url}")
             response: Response = requests.get(request_url, headers=headers)
-            self._logger.debug(f"Response: {response.json()}")
+            self._logger.debug(f"Response: {response}")
             
             if response.status_code == 200:
                 # Convert the JSON response to a list of HibpBreachedSiteModel objects

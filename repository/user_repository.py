@@ -63,6 +63,10 @@ class UserRepository(RepositoryBaseClass):
     def get_all(self) -> list[User]:
         users = User.query.all()
         return users
+    
+    def get_first(self) -> User:
+        user = User.query.first()
+        return user
 
     def update_one(self, model: User) -> bool:
         try:

@@ -64,3 +64,11 @@ class PwnedPlatformRepository(RepositoryBaseClass):
             db.session.rollback()
             self._logger.exception(f"pwned_platform_repository.delete_one failed: {e}")
             return False
+
+    def get_by_email_id(self, email_id: int) -> list[PwnedPlatform]:
+        """Get all pwned platforms for a specific email ID"""
+        try:
+            return PwnedPlatform.query.filter_by(email_id=email_id).all()
+        except Exception as e:
+            self._logger.exception(f"pwned_platform_repository.get_by_email_id failed: {e}")
+            return []
