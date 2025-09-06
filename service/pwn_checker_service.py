@@ -1,4 +1,4 @@
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from util.have_i_been_pwned_request_executor import HaveIBeenPwnedRequestExecutor
 
 @singleton

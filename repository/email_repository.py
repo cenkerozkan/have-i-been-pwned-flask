@@ -1,4 +1,4 @@
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from db.model.email import Email
 from db.db import db
 from base.repository_base_class import RepositoryBaseClass

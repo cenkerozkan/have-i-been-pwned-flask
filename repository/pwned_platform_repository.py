@@ -1,4 +1,4 @@
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from util.logger import get_logger
 from db.db import db
 from db.model.pwned_platform import PwnedPlatform

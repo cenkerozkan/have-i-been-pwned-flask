@@ -6,7 +6,7 @@ from requests import Response
 from dotenv import load_dotenv
 from pprint import pprint
 
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
 from exceptions.hibp_could_not_be_verified_exception import HibpCouldNotBeVerifiedException
 from util.logger import get_logger

@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from exceptions.no_user_found_exception import NoUserFoundException
 from model.user_route_models import CreateNewUserModel, UserCredentials
 from repository.user_repository import UserRepository
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from db.model.user import User
 from util.logger import get_logger
 
@@ -16,14 +16,12 @@ class UserService:
         self._db: UserRepository = UserRepository()
         self._logger: Logger = get_logger(self.__class__.__name__)
 
-    # NOTE: For testing purposes.
     def create_dummy_user(self):
         self._logger.info("Creating dummy user")
         dum_user = User(user_name="example", email="example@example.com", password="example")
         self._db.insert_one(dum_user)
         self._logger.info("Created dummy user")
 
-    # NOTE: For testing purposes.
     def get_dummy_user(self):
         self._logger.info("Getting dummy user")
         dum_user = self._db.get_one_by_email(email="example@example.com")
@@ -62,7 +60,6 @@ class UserService:
             result["error"] = str(e)
 
         return result
-
 
     def login(
             self,

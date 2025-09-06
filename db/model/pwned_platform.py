@@ -14,9 +14,9 @@ class PwnedPlatform(db.Model):
     )
     title = db.Column(db.String, nullable=True)
     domain = db.Column(db.String, nullable=False)
-    breach_date = db.Column(db.String, nullable=False)
+    breach_date = db.Column(db.Date, nullable=False)
     created_at = db.Column(db.DateTime, nullable=True, default=datetime.now())
-    descripiton = db.Column(db.String, nullable=True)
+    description = db.Column(db.String, nullable=True)
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
 
     # Relationships

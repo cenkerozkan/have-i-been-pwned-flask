@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from db.db import db
 from db.model import User
 from base.repository_base_class import RepositoryBaseClass
-from decorators.sinlgeton import singleton
+from decorators.singleton import singleton
 from util.logger import get_logger
 from exceptions.user_already_exists import UserAlreadyExistsException
 from exceptions.no_user_found_exception import NoUserFoundException
