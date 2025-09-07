@@ -1,4 +1,5 @@
 from decorators.singleton import singleton
+from sqlalchemy.exc import IntegrityError
 from db.model.email import Email
 from db.db import db
 from base.repository_base_class import RepositoryBaseClass
@@ -16,6 +17,9 @@ class EmailRepository(RepositoryBaseClass):
             db.session.add(email)
             db.session.commit()
             return True
+        except IntegrityError as e:
+            self._logger.error(f"IntegrityError: {e}")
+            raise
         except Exception as e:
             db.session.rollback()
             self._logger.exception(f"email_repository.insert_one() falied: {e}")
@@ -63,4 +67,14 @@ class EmailRepository(RepositoryBaseClass):
         except Exception as e:
             db.session.rollback()
             self._logger.exception(f"email_repository.delete_one() falied: {e}")
+            return False
+        
+    def delete_all(self) -> bool:
+        try:
+            db.session.query(Email).delete()
+            db.session.commit()
+            return True
+        except Exception as e:
+            db.session.rollback()
+            self._logger.exception(f"email_repository.delete_all() falied: {e}")
             return False
