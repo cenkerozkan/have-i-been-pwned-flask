@@ -14,9 +14,9 @@ from util.logger import get_logger
 
 logger = get_logger(__name__)
 
-user_routes_blueprint = Blueprint('user_routes', __name__)
+user_routes_blueprint = Blueprint('user_routes', __name__, url_prefix='/api/user')
 
-@user_routes_blueprint.route('/user_routes/register', methods=['POST'])
+@user_routes_blueprint.route('/register', methods=['POST'])
 def register() -> Response:
     try:
         new_user = CreateNewUserModel(**request.get_json())
@@ -57,7 +57,7 @@ def register() -> Response:
             mimetype='application/json'
         )
 
-@user_routes_blueprint.route('/user_routes/login', methods=['POST'])
+@user_routes_blueprint.route('/login', methods=['POST'])
 def login() -> Response:
     try:
         user_credentials = UserCredentials(**request.get_json())
@@ -98,7 +98,7 @@ def login() -> Response:
             mimetype='application/json'
         )
 
-@user_routes_blueprint.route('/user_routes/change_password', methods=['POST'])
+@user_routes_blueprint.route('/change_password', methods=['POST'])
 def change_password() -> Response:
     try:
         password_data = ChangePasswordModel(**request.get_json())
