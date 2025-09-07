@@ -2,7 +2,7 @@ from typing import Dict, List, Any, Union
 from decorators.singleton import singleton
 from util.logger import get_logger
 from repository.scheduler_config_repository import SchedulerConfigRepository
-from scheduler.scheduler import scheduler
+from scheduler.scheduler import Scheduler
 
 @singleton
 class SchedulerSettingsService:

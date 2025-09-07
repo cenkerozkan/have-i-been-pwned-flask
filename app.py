@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
 
 from db.db import db
-from scheduler.scheduler import scheduler
+from scheduler.scheduler import Scheduler
 from util.logger import get_logger
 from route.credential_list_routes import credential_list_blueprint
 from route.user_routes import user_routes_blueprint
@@ -36,7 +36,6 @@ def create_app(config: dict | None = None) -> Flask:
     # Extensions
     logger.info("Initializing app with config")
     db.init_app(app)
-    scheduler.init_app(app)
     jwt.init_app(app)
     EmailSender().init_app(app)
 
@@ -49,7 +48,7 @@ def create_app(config: dict | None = None) -> Flask:
     with app.app_context():
         # Extensions.
         db.create_all()
-        scheduler.start()
+        Scheduler().init_app(app)
 
         # Repositories
         UserRepository()
@@ -126,10 +125,8 @@ def create_app(config: dict | None = None) -> Flask:
     return app
 
 
-# WSGI entrypoint (Gunicorn/Heroku: `web: gunicorn app:app`)
 app = create_app()
 
 if __name__ == "__main__":
-    # Local dev: `python app.py`
     app = create_app()
     app.run(debug=True)

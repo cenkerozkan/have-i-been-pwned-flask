@@ -72,5 +72,3 @@ class Scheduler:
             }
             for job in self._scheduler.get_jobs()
         ]
-
-scheduler = Scheduler()
