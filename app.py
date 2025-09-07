@@ -11,6 +11,7 @@ from route.credential_list_routes import credential_list_blueprint
 from route.user_routes import user_routes_blueprint
 from route.scheduler_settings_routes import scheduler_settings_blueprint
 from route.email_routes import email_routes_blueprint
+from route.pwned_platform_routes import pwned_platform_routes_blueprint
 from service.user_service import UserService
 from model.response_model import ResponseModel
 from repository.user_repository import UserRepository
@@ -46,6 +47,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(credential_list_blueprint)
     app.register_blueprint(scheduler_settings_blueprint)
     app.register_blueprint(email_routes_blueprint)
+    app.register_blueprint(pwned_platform_routes_blueprint)
 
     with app.app_context():
         # Extensions.

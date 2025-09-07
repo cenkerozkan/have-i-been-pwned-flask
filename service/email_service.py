@@ -24,7 +24,7 @@ class EmailService:
             
             result["success"] = True
             result["message"] = "Successfully retrieved all emails"
-            result["data"] = {"emails": [email.email for email in emails]}
+            result["data"] = {"emails": [{"id": email.id, "email": email.email} for email in emails]}
             
         except Exception as e:
             result["success"] = False
