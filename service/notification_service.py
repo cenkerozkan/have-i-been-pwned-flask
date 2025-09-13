@@ -16,7 +16,6 @@ class NotificationService:
 
     def send_breach_notification(
         self,
-        email_address: str,
         new_breaches: List[HibpBreachedSiteModel]
     ) -> bool:
         """Send notification about new breaches to the user.

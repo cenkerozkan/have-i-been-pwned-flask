@@ -46,7 +46,6 @@ class EmailSender:
         try:
             subject: str = f"ALERT: New Security Breaches Detected"
             
-            # Build the email body
             body: str = "The following new breaches have been detected:\n\n"
             for site in breached_sites:
                 body += f"- {site.title} ({site.breach_date}): {site.domain}\n"
