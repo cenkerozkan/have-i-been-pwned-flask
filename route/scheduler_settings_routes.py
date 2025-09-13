@@ -15,13 +15,13 @@ def get_settings() -> Response:
     result: Dict[str, Any] = settings_service.get_pwn_check_settings()
     
     return Response(
-        response=ResponseModel(
-            success=result["success"],
-            message=result["message"],
-            data=result["data"],
-            error=result["error"]
-        ).model_dump(),
-        status=200 if result["success"] else 400,
+        response=str(ResponseModel(
+            success=result.get("success"),
+            message=result.get("message"),
+            data=result.get("data"),
+            error=result.get("error")
+        ).model_dump()),
+        status=200 if result.get("success") else 400,
         mimetype="application/json"
     )
     
@@ -31,13 +31,13 @@ def get_status() -> Response:
     result: Dict[str, Any] = settings_service.get_scheduler_status()
     
     return Response(
-        response=ResponseModel(
-            success=result["success"],
-            message=result["message"],
-            data=result["data"],
-            error=result["error"]
-        ).model_dump(),
-        status=200 if result["success"] else 400,
+        response=str(ResponseModel(
+            success=result.get("success"),
+            message=result.get("message"),
+            data=result.get("data"),
+            error=result.get("error")
+        ).model_dump()),
+        status=200 if result.get("success") else 400,
         mimetype="application/json"
     )
     
@@ -53,36 +53,36 @@ def update_settings() -> Response:
         )
         
         return Response(
-            response=ResponseModel(
-                success=result["success"],
-                message=result["message"],
-                data=result["data"],
-                error=result["error"]
-            ).model_dump(),
-            status=200 if result["success"] else 400,
+            response=str(ResponseModel(
+                success=result.get("success"),
+                message=result.get("message"),
+                data=result.get("data"),
+                error=result.get("error")
+            ).model_dump()),
+            status=200 if result.get("success") else 400,
             mimetype="application/json"
         )
             
     except ValidationError as e:
         return Response(
-            response=ResponseModel(
+            response=str(ResponseModel(
                 success=False,
                 message="Wrong JSON Format!",
                 data=None,
                 error=str(e)
-            ).model_dump(),
+            ).model_dump()),
             status=422,
             mimetype="application/json"
         )
         
     except Exception as e:
         return Response(
-            response=ResponseModel(
+            response=str(ResponseModel(
                 success=False,
                 message="An unknown error occurred.",
                 data=None,
                 error=str(e)
-            ).model_dump(),
+            ).model_dump()),
             status=500,
             mimetype="application/json"
         )

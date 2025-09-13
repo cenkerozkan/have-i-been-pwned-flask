@@ -9,6 +9,7 @@ class SchedulerSettingsService:
     def __init__(self) -> None:
         self._logger = get_logger(__name__)
         self._config_repo = SchedulerConfigRepository()
+        self._scheduler = Scheduler()
         
     def get_pwn_check_settings(self) -> Dict[str, Any]:
         result: Dict[str, Any] = {"success": False, "message": "", "data": {}, "error": ""}
@@ -50,7 +51,7 @@ class SchedulerSettingsService:
                 result["error"] = "Interval value must be greater than 0"
                 return result
                 
-            update_result: bool = scheduler.update_pwn_check_job(interval_unit, interval_value)
+            update_result: bool = self._scheduler.update_pwn_check_job(interval_unit, interval_value)
             
             if update_result:
                 result["success"] = True
@@ -72,11 +73,11 @@ class SchedulerSettingsService:
         result: Dict[str, Any] = {"success": False, "message": "", "data": {}, "error": ""}
         
         try:
-            jobs = scheduler.get_jobs()
+            jobs = self._scheduler.get_jobs()
             
             result["success"] = True
             result["message"] = "Scheduler status retrieved successfully"
-            result["data"] = jobs
+            result["data"] = {"jobs": jobs}
             
         except Exception as e:
             result["success"] = False

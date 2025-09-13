@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Set
 from datetime import datetime
 import time
 
@@ -25,7 +25,7 @@ class PwnChecker:
         
     def _check_email_for_breaches(self, email: Email) -> Optional[List[HibpBreachedSiteModel]]:
         try:
-            breach_results = self._hibp_client.get_breached_accounts(email=email.email)
+            breach_results: Set[HibpBreachedSiteModel] = self._hibp_client.get_breached_accounts(email=email.email)
             if not breach_results:
                 return None
                 
@@ -56,14 +56,20 @@ class PwnChecker:
         try:
             if not breaches:
                 return True
-                
+            
             pwned_platforms: List[PwnedPlatform] = []
             for breach in breaches:
+                breach_date = datetime.fromisoformat(breach.breach_date) 
+                if isinstance(breach.breach_date, str):
+                    breach_date = datetime.fromisoformat(breach.breach_date)
+                else:
+                    breach_date = breach.breach_date
+
                 pwned_platform = PwnedPlatform(
                     name=breach.name,
                     title=breach.title,
                     domain=breach.domain,
-                    breach_date=breach.breach_date,
+                    breach_date=breach_date,
                     added_date=breach.added_date,
                     description=breach.description,
                     is_verified=breach.is_verified,
