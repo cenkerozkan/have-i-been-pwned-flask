@@ -68,7 +68,7 @@ class EmailRepository(RepositoryBaseClass):
             db.session.rollback()
             self._logger.exception(f"email_repository.delete_one() falied: {e}")
             return False
-        
+
     def delete_all(self) -> bool:
         try:
             db.session.query(Email).delete()

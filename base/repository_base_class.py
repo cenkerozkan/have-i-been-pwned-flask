@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-class RepositoryBaseClass(ABC):
 
+class RepositoryBaseClass(ABC):
     @abstractmethod
     def insert_one(self, model):
         raise NotImplementedError

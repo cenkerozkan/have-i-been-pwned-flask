@@ -22,6 +22,7 @@ from util.email_sender import EmailSender
 load_dotenv()
 logger = get_logger(__name__)
 
+
 def create_app(config: dict | None = None) -> Flask:
     app = Flask(__name__)
     jwt = JWTManager(app)
@@ -42,7 +43,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(pwned_platform_routes_blueprint)
 
     with app.app_context():
-            # Extensions
+        # Extensions
         logger.info("Initializing app with config")
         # NOTE: db must be initialized before scheduler,
         #       since scheduler checks the config table
@@ -60,7 +61,6 @@ def create_app(config: dict | None = None) -> Flask:
         # Utilities
         HibpClient()
 
-
     @app.before_request
     def block_until_user_exists():
         is_users_empty: bool = UserRepository().is_table_empty()
@@ -72,28 +72,35 @@ def create_app(config: dict | None = None) -> Flask:
 
         if is_users_empty:
             return Response(
-                response=str(ResponseModel(
-                    success=False,
-                    message="You have to create an account first!",
-                    data=None,
-                    error="",).model_dump()),
+                response=str(
+                    ResponseModel(
+                        success=False,
+                        message="You have to create an account first!",
+                        data=None,
+                        error="",
+                    ).model_dump()
+                ),
                 status=401,
-                mimetype="application/json")
+                mimetype="application/json",
+            )
 
         if request.endpoint == "user_routes.register" and not is_users_empty:
             return Response(
-                response=str(ResponseModel(
-                    success=False,
-                    message="There is already a user.",
-                    data=None,
-                    error=""
-                ).model_dump()),
+                response=str(
+                    ResponseModel(
+                        success=False,
+                        message="There is already a user.",
+                        data=None,
+                        error="",
+                    ).model_dump()
+                ),
                 status=409,
-                mimetype="application/json")
+                mimetype="application/json",
+            )
 
     @app.before_request
     def log_request_info():
-        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr)
         logger.info(f"Request: {request.method} {request.path} from IP: {ip}")
 
     # Routes

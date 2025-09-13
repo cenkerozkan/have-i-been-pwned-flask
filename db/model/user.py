@@ -2,6 +2,7 @@ from datetime import datetime
 from sqlalchemy.orm import relationship
 from ..db import db
 
+
 class User(db.Model):
     __tablename__ = "users"
 
@@ -16,6 +17,6 @@ class User(db.Model):
     emails = relationship(
         "Email",
         back_populates="user",
-        cascade="all, delete-orphan",   # ensures child rows deleted
-        passive_deletes=True
+        cascade="all, delete-orphan",  # ensures child rows deleted
+        passive_deletes=True,
     )

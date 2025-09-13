@@ -45,10 +45,11 @@ class UserRepository(RepositoryBaseClass):
 
     def get_one_by_email_and_password(self, email: str, password: str) -> User:
         try:
-            user = db.session.query(User).filter(
-                User.email == email,
-                User.password == password
-            ).first()
+            user = (
+                db.session.query(User)
+                .filter(User.email == email, User.password == password)
+                .first()
+            )
 
             if not user:
                 # Replace this with your own exception
@@ -57,13 +58,15 @@ class UserRepository(RepositoryBaseClass):
 
         except Exception as e:
             db.session.rollback()
-            self._logger.exception(f"user_repository.get_one_by_email_and_password failed: {e}")
+            self._logger.exception(
+                f"user_repository.get_one_by_email_and_password failed: {e}"
+            )
             raise
 
     def get_all(self) -> list[User]:
         users = User.query.all()
         return users
-    
+
     def get_first(self) -> User:
         user = User.query.first()
         return user
@@ -101,9 +104,7 @@ class UserRepository(RepositoryBaseClass):
 
     def get_one_by_username(self, user_name: str) -> User:
         try:
-            user = db.session.query(User).filter(
-                User.user_name == user_name
-            ).first()
+            user = db.session.query(User).filter(User.user_name == user_name).first()
 
             if not user:
                 raise NoUserFoundException()

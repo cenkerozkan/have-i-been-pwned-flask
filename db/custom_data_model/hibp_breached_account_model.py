@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class HibpBreachedAccountModel(BaseModel):
     domain: str
     title: str

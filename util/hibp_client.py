@@ -7,11 +7,14 @@ from dotenv import load_dotenv
 
 from decorators.singleton import singleton
 from exceptions.no_hibp_key_found_exception import NoHibpKeyFoundException
-from exceptions.hibp_could_not_be_verified_exception import HibpCouldNotBeVerifiedException
+from exceptions.hibp_could_not_be_verified_exception import (
+    HibpCouldNotBeVerifiedException,
+)
 from model.hibp_breached_site_model import HibpBreachedSiteModel
 from util.logger import get_logger
 
 load_dotenv()
+
 
 @singleton
 class HibpClient:
@@ -34,9 +37,9 @@ class HibpClient:
         self._logger.info(f"API version changed to: {value}")
 
     def get_breached_accounts(
-            self,
-            email: str,
-            truncate_response: bool = False,
+        self,
+        email: str,
+        truncate_response: bool = False,
     ) -> Optional[List[HibpBreachedSiteModel]] | None:
         """
         Retrieves breached account information for a given email address.
@@ -48,18 +51,21 @@ class HibpClient:
         if not hibp_key:
             self._logger.error("No HIBP API key found in environment variables")
             raise NoHibpKeyFoundException()
-            
+
         request_url: str = f"{self._BASE_URL}/breachedaccount/{email}?truncateResponse={str(truncate_response).lower()}"
         headers: dict = {"hibp-api-key": hibp_key}
-        
+
         try:
             self._logger.debug(f"Sending request to: {request_url}")
             response: Response = requests.get(request_url, headers=headers)
             self._logger.debug(f"Response: {response}")
-            
+
             if response.status_code == 200:
                 # Convert the JSON response to a list of HibpBreachedSiteModel objects
-                return [HibpBreachedSiteModel.model_validate(item) for item in response.json()]
+                return [
+                    HibpBreachedSiteModel.model_validate(item)
+                    for item in response.json()
+                ]
             elif response.status_code == 404:
                 self._logger.info(f"No breaches found for email: {email}")
                 return None
@@ -69,33 +75,33 @@ class HibpClient:
             else:
                 self._logger.warning(f"Unexpected status code: {response.status_code}")
                 response.raise_for_status()
-                
+
         except requests.exceptions.RequestException as e:
             self._logger.error(f"Request failed: {str(e)}")
             raise
 
     def get_mock_breached_accounts(
-            self,
-            email: str,
-            truncate_response: bool = False,
+        self,
+        email: str,
+        truncate_response: bool = False,
     ) -> Optional[List[HibpBreachedSiteModel]] | None:
         """
         Returns mock breach data for testing purposes.
-        
+
         Args:
             email: Email address to check (used only for logging)
             truncate_response: Ignored in mock implementation
-            
+
         Returns:
             List of HibpBreachedSiteModel objects with sample breach data or None
         """
         self._logger.info(f"Using mock breach data for email: {email}")
-        
+
         # Simulate some emails having no breaches
         if email.endswith(".gov") or email.endswith(".edu"):
             self._logger.info(f"No breaches found for email: {email} (mock)")
             return None
-            
+
         mock_data = [
             {
                 "Name": "Dailymotion",
@@ -105,15 +111,11 @@ class HibpClient:
                 "AddedDate": "2017-08-07T02:51:12Z",
                 "ModifiedDate": "2017-08-07T02:51:12Z",
                 "PwnCount": 85176234,
-                "Description": "In October 2016, the video sharing platform <a href=\"http://thehackernews.com/2016/12/dailymotion-video-hacked.html\" target=\"_blank\" rel=\"noopener\">Dailymotion suffered a data breach</a>. The attack led to the exposure of more than 85 million user accounts and included email addresses, usernames and bcrypt hashes of passwords.",
+                "Description": 'In October 2016, the video sharing platform <a href="http://thehackernews.com/2016/12/dailymotion-video-hacked.html" target="_blank" rel="noopener">Dailymotion suffered a data breach</a>. The attack led to the exposure of more than 85 million user accounts and included email addresses, usernames and bcrypt hashes of passwords.',
                 "LogoPath": "https://logos.haveibeenpwned.com/Dailymotion.png",
                 "Attribution": None,
                 "DisclosureUrl": None,
-                "DataClasses": [
-                    "Email addresses",
-                    "Passwords",
-                    "Usernames"
-                ],
+                "DataClasses": ["Email addresses", "Passwords", "Usernames"],
                 "IsVerified": True,
                 "IsFabricated": False,
                 "IsSensitive": False,
@@ -121,7 +123,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             {
                 "Name": "BlankMediaGames",
@@ -131,7 +133,7 @@ class HibpClient:
                 "AddedDate": "2019-01-02T05:52:56Z",
                 "ModifiedDate": "2019-01-02T06:03:19Z",
                 "PwnCount": 7633234,
-                "Description": "In December 2018, the Town of Salem website produced by <a href=\"https://blog.dehashed.com/town-of-salem-blankmediagames-hacked/\" target=\"_blank\" rel=\"noopener\">BlankMediaGames suffered a data breach</a>. Reported to HIBP by <a href=\"https://dehashed.com/\" target=\"_blank\" rel=\"noopener\">DeHashed</a>, the data contained 7.6M unique user email addresses alongside usernames, IP addresses, purchase histories and passwords stored as phpass hashes. DeHashed made multiple attempts to contact BlankMediaGames over various channels and many days but had yet to receive a response at the time of publishing.",
+                "Description": 'In December 2018, the Town of Salem website produced by <a href="https://blog.dehashed.com/town-of-salem-blankmediagames-hacked/" target="_blank" rel="noopener">BlankMediaGames suffered a data breach</a>. Reported to HIBP by <a href="https://dehashed.com/" target="_blank" rel="noopener">DeHashed</a>, the data contained 7.6M unique user email addresses alongside usernames, IP addresses, purchase histories and passwords stored as phpass hashes. DeHashed made multiple attempts to contact BlankMediaGames over various channels and many days but had yet to receive a response at the time of publishing.',
                 "LogoPath": "https://logos.haveibeenpwned.com/BlankMediaGames.png",
                 "Attribution": None,
                 "DisclosureUrl": None,
@@ -142,7 +144,7 @@ class HibpClient:
                     "Passwords",
                     "Purchases",
                     "Usernames",
-                    "Website activity"
+                    "Website activity",
                 ],
                 "IsVerified": True,
                 "IsFabricated": False,
@@ -151,7 +153,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             {
                 "Name": "Wattpad",
@@ -161,7 +163,7 @@ class HibpClient:
                 "AddedDate": "2020-07-19T22:49:19Z",
                 "ModifiedDate": "2020-07-19T22:49:19Z",
                 "PwnCount": 268765495,
-                "Description": "In June 2020, the user-generated stories website <a href=\"https://www.bleepingcomputer.com/news/security/wattpad-data-breach-exposes-account-info-for-millions-of-users/\" target=\"_blank\" rel=\"noopener\">Wattpad suffered a huge data breach that exposed almost 270 million records</a>. The data was initially sold then published on a public hacking forum where it was broadly shared. The incident exposed extensive personal information including names and usernames, email and IP addresses, genders, birth dates and passwords stored as bcrypt hashes.",
+                "Description": 'In June 2020, the user-generated stories website <a href="https://www.bleepingcomputer.com/news/security/wattpad-data-breach-exposes-account-info-for-millions-of-users/" target="_blank" rel="noopener">Wattpad suffered a huge data breach that exposed almost 270 million records</a>. The data was initially sold then published on a public hacking forum where it was broadly shared. The incident exposed extensive personal information including names and usernames, email and IP addresses, genders, birth dates and passwords stored as bcrypt hashes.',
                 "LogoPath": "https://logos.haveibeenpwned.com/Wattpad.png",
                 "Attribution": None,
                 "DisclosureUrl": None,
@@ -176,7 +178,7 @@ class HibpClient:
                     "Passwords",
                     "Social media profiles",
                     "User website URLs",
-                    "Usernames"
+                    "Usernames",
                 ],
                 "IsVerified": True,
                 "IsFabricated": False,
@@ -185,7 +187,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             {
                 "Name": "Kaneva",
@@ -203,7 +205,7 @@ class HibpClient:
                     "Dates of birth",
                     "Email addresses",
                     "Passwords",
-                    "Usernames"
+                    "Usernames",
                 ],
                 "IsVerified": True,
                 "IsFabricated": False,
@@ -212,7 +214,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             # Additional mock breaches
             {
@@ -233,7 +235,7 @@ class HibpClient:
                     "Employment details",
                     "Names",
                     "Geographic locations",
-                    "Social media profiles"
+                    "Social media profiles",
                 ],
                 "IsVerified": True,
                 "IsFabricated": False,
@@ -242,7 +244,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             {
                 "Name": "Dropbox",
@@ -256,11 +258,7 @@ class HibpClient:
                 "LogoPath": "https://logos.haveibeenpwned.com/Dropbox.png",
                 "Attribution": None,
                 "DisclosureUrl": None,
-                "DataClasses": [
-                    "Email addresses",
-                    "Passwords",
-                    "Names"
-                ],
+                "DataClasses": ["Email addresses", "Passwords", "Names"],
                 "IsVerified": True,
                 "IsFabricated": False,
                 "IsSensitive": False,
@@ -268,7 +266,7 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
+                "IsStealerLog": False,
             },
             {
                 "Name": "Adobe",
@@ -287,7 +285,7 @@ class HibpClient:
                     "Passwords",
                     "Subscription details",
                     "Names",
-                    "Payment info"
+                    "Payment info",
                 ],
                 "IsVerified": True,
                 "IsFabricated": False,
@@ -296,14 +294,15 @@ class HibpClient:
                 "IsSpamList": False,
                 "IsMalware": False,
                 "IsSubscriptionFree": False,
-                "IsStealerLog": False
-            }
+                "IsStealerLog": False,
+            },
         ]
-        
+
         # Convert the mock data to HibpBreachedSiteModel objects
         return [HibpBreachedSiteModel.model_validate(item) for item in mock_data]
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     obj = HibpClient()
     email = "cenkerozkanse@gmail.com.tr"  # Use a test email instead of a real one
     # result = obj.get_breached_accounts(email=email)

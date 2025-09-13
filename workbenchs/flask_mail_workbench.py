@@ -42,17 +42,18 @@ app.config.update(
     MAIL_USE_TLS=os.getenv("MAIL_USE_TLS", "True").lower() == "true",
     MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
     MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),
-    MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER")
+    MAIL_DEFAULT_SENDER=os.getenv("MAIL_DEFAULT_SENDER"),
 )
 
 # Initialize Flask-Mail
 mail = Mail(app)
 
-@app.route('/send-email', methods=['POST'])
+
+@app.route("/send-email", methods=["POST"])
 def send_email():
     """
     Send a test email using Flask-Mail
-    
+
     Expected JSON body:
     {
         "recipient": "recipient@example.com",
@@ -62,40 +63,36 @@ def send_email():
     """
     try:
         data = request.get_json()
-        
+
         if not data:
             return jsonify({"success": False, "message": "No JSON data provided"}), 400
-            
-        recipient = data.get('recipient')
-        subject = data.get('subject', 'Test Email from Flask-Mail Workbench')
-        body = data.get('body', 'This is a test email from Flask-Mail workbench.')
-        
+
+        recipient = data.get("recipient")
+        subject = data.get("subject", "Test Email from Flask-Mail Workbench")
+        body = data.get("body", "This is a test email from Flask-Mail workbench.")
+
         if not recipient:
-            return jsonify({"success": False, "message": "Recipient email is required"}), 400
-            
+            return jsonify(
+                {"success": False, "message": "Recipient email is required"}
+            ), 400
+
         # Create message
-        msg = Message(
-            subject=subject,
-            recipients=[recipient],
-            body=body
-        )
-        
+        msg = Message(subject=subject, recipients=[recipient], body=body)
+
         # Send email
         mail.send(msg)
-        
-        return jsonify({
-            "success": True,
-            "message": f"Email sent successfully to {recipient}"
-        })
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "message": "Failed to send email",
-            "error": str(e)
-        }), 500
 
-@app.route('/')
+        return jsonify(
+            {"success": True, "message": f"Email sent successfully to {recipient}"}
+        )
+
+    except Exception as e:
+        return jsonify(
+            {"success": False, "message": "Failed to send email", "error": str(e)}
+        ), 500
+
+
+@app.route("/")
 def index():
     """Simple index page with instructions"""
     return """
@@ -134,11 +131,14 @@ curl -X POST http://localhost:5000/send-email \\
     </html>
     """
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # Check if mail configuration is set
-    if not app.config['MAIL_USERNAME'] or not app.config['MAIL_PASSWORD']:
-        print("WARNING: Mail username or password not set. Set MAIL_USERNAME and MAIL_PASSWORD environment variables.")
-        
+    if not app.config["MAIL_USERNAME"] or not app.config["MAIL_PASSWORD"]:
+        print(
+            "WARNING: Mail username or password not set. Set MAIL_USERNAME and MAIL_PASSWORD environment variables."
+        )
+
     # Print configuration (without password)
     print("Mail Configuration:")
     print(f"  MAIL_SERVER: {app.config['MAIL_SERVER']}")
@@ -146,6 +146,6 @@ if __name__ == '__main__':
     print(f"  MAIL_USE_TLS: {app.config['MAIL_USE_TLS']}")
     print(f"  MAIL_USERNAME: {app.config['MAIL_USERNAME']}")
     print(f"  MAIL_DEFAULT_SENDER: {app.config['MAIL_DEFAULT_SENDER']}")
-    
+
     # Run the Flask app
     app.run(debug=True)
