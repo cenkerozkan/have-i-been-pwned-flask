@@ -4,6 +4,7 @@ from db.db import db
 from db.model.pwned_platform import PwnedPlatform
 from base.repository_base_class import RepositoryBaseClass
 
+
 @singleton
 class PwnedPlatformRepository(RepositoryBaseClass):
     def __init__(self):
@@ -64,7 +65,7 @@ class PwnedPlatformRepository(RepositoryBaseClass):
             db.session.rollback()
             self._logger.exception(f"pwned_platform_repository.delete_one failed: {e}")
             return False
-        
+
     def delete_all(self) -> bool:
         try:
             db.session.query(PwnedPlatform).delete()
@@ -80,5 +81,7 @@ class PwnedPlatformRepository(RepositoryBaseClass):
         try:
             return PwnedPlatform.query.filter_by(email_id=email_id).all()
         except Exception as e:
-            self._logger.exception(f"pwned_platform_repository.get_by_email_id failed: {e}")
+            self._logger.exception(
+                f"pwned_platform_repository.get_by_email_id failed: {e}"
+            )
             return []

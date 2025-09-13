@@ -6,7 +6,9 @@ class SimpleTestModel(BaseModel):
     name: str
     surname: str
 
+
 app = Flask(__name__)
+
 
 @app.route("/simple_test", methods=["POST"])
 def simple_test():
@@ -15,6 +17,7 @@ def simple_test():
         return jsonify({"message": "success"}), 200
     except ValidationError as e:
         return jsonify(success=False, error=str(e)), 422
+
 
 if __name__ == "__main__":
     app.run(debug=True)

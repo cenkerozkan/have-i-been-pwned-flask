@@ -2,6 +2,7 @@ from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel, HttpUrl
 
+
 class HibpBreachedSiteModel(BaseModel):
     name: str
     title: str
@@ -23,8 +24,10 @@ class HibpBreachedSiteModel(BaseModel):
     is_malware: bool
     is_subscription_free: bool
     is_stealer_log: bool
-    
+
     model_config = {
         "populate_by_name": True,
-        "alias_generator": lambda s: ''.join(word.capitalize() for word in s.split('_'))
+        "alias_generator": lambda s: "".join(
+            word.capitalize() for word in s.split("_")
+        ),
     }
