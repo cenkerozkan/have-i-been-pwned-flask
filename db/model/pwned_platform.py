@@ -1,5 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
+import json
+from typing import List
 from ..db import db
 
 class PwnedPlatform(db.Model):
@@ -19,10 +21,33 @@ class PwnedPlatform(db.Model):
     added_date = db.Column(db.DateTime, nullable=True, default=datetime.now())
     description = db.Column(db.String, nullable=True)
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
+    _data_classes = db.Column('data_classes', db.Text, nullable=True)
     created_at = db.Column(db.DateTime, nullable=True, default=datetime.now())
 
     # Relationships
     email = relationship("Email", back_populates="pwned_platforms")
+
+    @property
+    def data_classes(self) -> List[str]:
+        """Get data classes as list"""
+        return json.loads(self._data_classes) if self._data_classes else []
+
+    @data_classes.setter
+    def data_classes(self, value: List[str]) -> None:
+        """Store data classes as JSON string"""
+        self._data_classes = json.dumps(value) if value else None
+
+    def __eq__(self, other):
+        if not isinstance(other, PwnedPlatform):
+            return False
+        
+        if self.name == other.name and self.breach_date == other.breach_date:
+            return True
+        
+        return False
+
+    def __hash__(self):
+        return hash((self.name, self.breach_date))
     
     def to_json(self):
         """Convert model fields to a dictionary"""

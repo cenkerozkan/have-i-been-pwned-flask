@@ -31,7 +31,7 @@ class EmailSender:
         self._mail = Mail(app)
         self._logger.info("Email sender initialized with app context")
 
-    def send_breach_notification(self, recipient_email: str, breached_sites: List[HibpBreachedSiteModel]) -> bool:
+    def send_breach_notification(self, email_address: str, recipient_email: str, breached_sites: List[HibpBreachedSiteModel]) -> bool:
         """
         Send email notification about new breaches
         
@@ -46,12 +46,11 @@ class EmailSender:
         try:
             subject: str = f"ALERT: New Security Breaches Detected"
             
-            # Build the email body
-            body: str = "The following new breaches have been detected:\n\n"
+            body: str = f"The following new breaches have been detected for {email_address}:\n\n"
             for site in breached_sites:
                 body += f"- {site.title} ({site.breach_date}): {site.domain}\n"
                 body += f"  Description: {site.description}\n"
-                body += f"  Data compromised: {', '.join(site.data_classes)}\n\n"
+                body += f"  Data compromised: {site.data_classes}\n\n"
             
             body += "\nPlease consider changing your passwords for these services."
             
@@ -62,9 +61,9 @@ class EmailSender:
             )
             
             self._mail.send(msg)
-            self._logger.info(f"Breach notification sent to {recipient_email}")
+            self._logger.info(f"Breach notification sent to {recipient_email} for {email_address}")
             return True
             
         except Exception as e:
-            self._logger.error(f"Failed to send breach notification: {str(e)}")
+            self._logger.error(f"Failed to send breach notification to {recipient_email} for {email_address}: {str(e)}")
             return False

@@ -11,8 +11,11 @@ class Scheduler:
         self._logger = get_logger(__name__)
         self._scheduler = APScheduler()
         self._config_repo = SchedulerConfigRepository()
+        self._app = None  # Store app reference
         
     def init_app(self, app: Flask) -> None:
+        self._app = app  # Store app reference
+        
         app.config.update(
             SCHEDULER_API_ENABLED=True,
             SCHEDULER_TIMEZONE="UTC"
@@ -35,9 +38,14 @@ class Scheduler:
         
         interval_kwargs: Dict[str, int] = {interval_unit: interval_value}
         
+        # Create a wrapper function that establishes app context using stored app reference
+        def run_with_app_context():
+            with self._app.app_context():
+                PwnChecker().run()
+        
         self._scheduler.add_job(
             id='pwn_check_job',
-            func=lambda: PwnChecker().run(),
+            func=run_with_app_context,
             trigger='interval',
             **interval_kwargs,
             name='Check for new breaches'

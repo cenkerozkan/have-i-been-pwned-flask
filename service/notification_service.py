@@ -38,7 +38,8 @@ class NotificationService:
 
             result = self._email_sender.send_breach_notification(
                 recipient_email=main_account_mail.email,
-                breached_sites=new_breaches
+                breached_sites=new_breaches,
+                email_address=email_address
             )
 
             return result

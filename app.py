@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from db.db import db
 from scheduler.scheduler import Scheduler
 from util.logger import get_logger
-from route.credential_list_routes import credential_list_blueprint
 from route.user_routes import user_routes_blueprint
 from route.scheduler_settings_routes import scheduler_settings_blueprint
 from route.email_routes import email_routes_blueprint
@@ -35,23 +34,22 @@ def create_app(config: dict | None = None) -> Flask:
     if config:
         app.config.update(config)
 
-    # Extensions
-    logger.info("Initializing app with config")
-    db.init_app(app)
-    jwt.init_app(app)
-    EmailSender().init_app(app)
-
     # Blueprints
     logger.info("Registering blueprint")
     app.register_blueprint(user_routes_blueprint)
-    app.register_blueprint(credential_list_blueprint)
     app.register_blueprint(scheduler_settings_blueprint)
     app.register_blueprint(email_routes_blueprint)
     app.register_blueprint(pwned_platform_routes_blueprint)
 
     with app.app_context():
-        # Extensions.
+            # Extensions
+        logger.info("Initializing app with config")
+        # NOTE: db must be initialized before scheduler,
+        #       since scheduler checks the config table
+        db.init_app(app)
         db.create_all()
+        jwt.init_app(app)
+        EmailSender().init_app(app)
         Scheduler().init_app(app)
 
         # Repositories
