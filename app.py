@@ -44,11 +44,13 @@ def create_app(config: dict | None = None) -> Flask:
     with app.app_context():
             # Extensions
         logger.info("Initializing app with config")
+        # NOTE: db must be initialized before scheduler,
+        #       since scheduler checks the config table
         db.init_app(app)
+        db.create_all()
         jwt.init_app(app)
         EmailSender().init_app(app)
         Scheduler().init_app(app)
-        db.create_all()
 
         # Repositories
         UserRepository()

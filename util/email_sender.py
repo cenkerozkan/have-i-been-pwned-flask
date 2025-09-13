@@ -50,7 +50,7 @@ class EmailSender:
             for site in breached_sites:
                 body += f"- {site.title} ({site.breach_date}): {site.domain}\n"
                 body += f"  Description: {site.description}\n"
-                body += f"  Data compromised: {', '.join(site.data_classes)}\n\n"
+                body += f"  Data compromised: {site.data_classes}\n\n"
             
             body += "\nPlease consider changing your passwords for these services."
             
