@@ -24,15 +24,6 @@ class PwnChecker:
         return self._email_repository.get_all()
         
     def _check_email_for_breaches(self, email: Email) -> Optional[List[HibpBreachedSiteModel]]:
-        """
-        Check a single email for breaches and return new breaches
-        
-        Args:
-            email: Email model to check
-            
-        Returns:
-            List of new HibpBreachedSiteModel objects or None if no new breaches
-        """
         try:
             breach_results = self._hibp_client.get_breached_accounts(email=email.email)
             if not breach_results:
@@ -40,13 +31,11 @@ class PwnChecker:
                 
             existing_breaches = self._pwned_platform_repository.get_by_email_id(email.id)
             
-            # Create a set of tuples with name and added_date for more accurate comparison
             existing_breach_keys = {
                 (breach.name, breach.added_date.isoformat() if breach.added_date else None) 
                 for breach in existing_breaches
             }
             
-            # Filter out breaches that already exist in the database
             new_breaches: List[HibpBreachedSiteModel] = []
             for breach in breach_results:
                 breach_key = (breach.name, breach.added_date.isoformat())
@@ -64,23 +53,12 @@ class PwnChecker:
             return None
             
     def _save_breaches(self, email: Email, breaches: List[HibpBreachedSiteModel]) -> bool:
-        """
-        Save new breaches to the database
-        
-        Args:
-            email: Email model to associate breaches with
-            breaches: List of HibpBreachedSiteModel objects to save
-            
-        Returns:
-            bool: True if saved successfully, False otherwise
-        """
         try:
             if not breaches:
                 return True
                 
             pwned_platforms: List[PwnedPlatform] = []
             for breach in breaches:
-                # Convert HibpBreachedSiteModel to PwnedPlatform model
                 pwned_platform = PwnedPlatform(
                     name=breach.name,
                     title=breach.title,
@@ -106,16 +84,6 @@ class PwnChecker:
             return False
             
     def _send_notification(self, email: Email, breaches: List[HibpBreachedSiteModel]) -> bool:
-        """
-        Send notification about new breaches
-        
-        Args:
-            email: Email model that was breached
-            breaches: List of HibpBreachedSiteModel objects containing breach information
-            
-        Returns:
-            bool: True if notification sent successfully, False otherwise
-        """
         try:
             if not breaches:
                 return True
@@ -137,25 +105,20 @@ class PwnChecker:
             return False
 
     def run(self) -> None:
-        """Run the breach check for all emails"""
         self._logger.info("Starting breach check for all emails")
         emails: list[Email] = self._get_all_emails()
         
         for i, email in enumerate(emails):
             self._logger.info(f"Processing email {i+1}/{len(emails)}: {email.email}")
             
-            # Check for new breaches
             new_breaches: Optional[List[HibpBreachedSiteModel]] = self._check_email_for_breaches(email)
             
             if new_breaches:
-                # Save new breaches to database
                 save_result: bool = self._save_breaches(email, new_breaches)
                 
-                # Send notification if save was successful
                 if save_result:
                     self._send_notification(email, new_breaches)
             
-            # Wait between emails to avoid rate limiting, except for the last email
             if i < len(emails) - 1:
                 self._logger.info(f"Waiting {self._rate_limit_wait_time} seconds before processing next email...")
                 time.sleep(self._rate_limit_wait_time)
