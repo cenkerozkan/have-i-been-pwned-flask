@@ -15,7 +15,7 @@ This approach follows REST principles where:
 3. Operations apply to the entire resource collection
 """
 
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, json
 from flask_jwt_extended import jwt_required
 from pydantic import ValidationError
 
@@ -39,7 +39,7 @@ def get_all_emails() -> Response:
         result: Dict[str, Any] = email_service.get_all_emails()
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -53,7 +53,7 @@ def get_all_emails() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -74,7 +74,7 @@ def delete_all_emails() -> Response:
         result: Dict[str, Any] = email_service.delete_all_emails()
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -88,7 +88,7 @@ def delete_all_emails() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -110,7 +110,7 @@ def create_email() -> Response:
         result: Dict[str, Any] = email_service.create_email(new_email)
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -124,7 +124,7 @@ def create_email() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -135,7 +135,7 @@ def create_email() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",

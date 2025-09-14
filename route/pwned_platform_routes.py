@@ -12,7 +12,7 @@ Since data is added to the pwned platform table via tasks, users cannot add
 pwned platforms voluntarily; they can only view them or delete them all.
 """
 
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, json
 from flask_jwt_extended import jwt_required
 
 from model.response_model import ResponseModel
@@ -37,7 +37,7 @@ def get_all_pwned_platforms() -> Response:
         result: Dict[str, Any] = pwned_platform_service.get_all_pwned_platforms()
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -51,7 +51,7 @@ def get_all_pwned_platforms() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -73,7 +73,7 @@ def delete_all_pwned_platforms() -> Response:
         result: Dict[str, Any] = pwned_platform_service.delete_all_pwned_platforms()
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -87,7 +87,7 @@ def delete_all_pwned_platforms() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -111,7 +111,7 @@ def get_by_email_id(email_id: int) -> Response:
         result: Dict[str, Any] = pwned_platform_service.get_by_email_id(email_id)
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -125,7 +125,7 @@ def get_by_email_id(email_id: int) -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
