@@ -1,6 +1,7 @@
 from pydantic import ValidationError
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, Response, render_template, json
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from repository.user_repository import UserRepository
 
 from model.user_route_models import (
     CreateNewUserModel,
@@ -17,6 +18,14 @@ logger = get_logger(__name__)
 user_routes_blueprint = Blueprint("user_routes", __name__, url_prefix="/api/user")
 
 
+@user_routes_blueprint.route("/login-page", methods=["GET"])
+def login_page() -> str:
+    """Render the login/register page based on whether a user exists."""
+    user_repo = UserRepository()
+    show_register = user_repo.is_table_empty()
+    return render_template("login.html", show_register=show_register)
+
+
 @user_routes_blueprint.route("/register", methods=["POST"])
 def register() -> Response:
     try:
@@ -24,7 +33,7 @@ def register() -> Response:
         service = UserService()
         result: dict = service.create_user(new_user)
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -38,7 +47,7 @@ def register() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -49,7 +58,7 @@ def register() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -69,13 +78,13 @@ def login() -> Response:
         service = UserService()
         result: dict = service.login(user_credentials)
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
                     data=result.get("data"),
                     error=result.get("error"),
-                )
+                ).model_dump()
             ),
             status=200,
             mimetype="application/json",
@@ -83,7 +92,7 @@ def login() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -94,7 +103,7 @@ def login() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -115,7 +124,7 @@ def change_password() -> Response:
         result: dict = service.change_password(password_data.user_name, password_data)
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -129,7 +138,7 @@ def change_password() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -140,7 +149,7 @@ def change_password() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
