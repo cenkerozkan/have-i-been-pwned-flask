@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from flask import Flask, request, Response
 from flask_jwt_extended import JWTManager
@@ -31,6 +32,7 @@ def create_app(config: dict | None = None) -> Flask:
         SQLALCHEMY_DATABASE_URI=f"sqlite:///{os.path.join(basedir, 'db', 'hibp.sqlite3')}",
         SQLALCHEMY_TRACK_MODIFICATIONS=False,
         JWT_SECRET_KEY=os.getenv("JWT_SECRET_KEY"),
+        JWT_ACCESS_TOKEN_EXPIRES=datetime.timedelta(minutes=60)
     )
     if config:
         app.config.update(config)
