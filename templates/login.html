@@ -63,8 +63,8 @@ $(document).ready(function() {
                 if (response.success) {
                     // Store the token
                     localStorage.setItem('jwt_token', response.data.access_token);
-                    // Redirect to dashboard or home
-                    window.location.href = '/dashboard';
+                    // Redirect to dashboard
+                    window.location.href = '/api/user/dashboard';
                 } else {
                     showAlert('danger', response.message);
                 }

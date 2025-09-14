@@ -26,6 +26,12 @@ def login_page() -> str:
     return render_template("login.html", show_register=show_register)
 
 
+@user_routes_blueprint.route("/dashboard", methods=["GET"])
+def dashboard() -> str:
+    """Render the dashboard page. Authentication is handled on the frontend."""
+    return render_template("dashboard.html")
+
+
 @user_routes_blueprint.route("/register", methods=["POST"])
 def register() -> Response:
     try:

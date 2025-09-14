@@ -70,6 +70,9 @@ def create_app(config: dict | None = None) -> Flask:
         if request.endpoint == "user_routes.register" and is_users_empty:
             return None
 
+        if request.endpoint == "user_routes.login_page":
+            return None
+
         if is_users_empty:
             return Response(
                 response=str(
