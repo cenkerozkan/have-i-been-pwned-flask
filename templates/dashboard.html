@@ -203,9 +203,77 @@
         <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
             <h3>Scheduler Settings</h3>
             <p>Configure how frequently the system checks for new breaches.</p>
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i>
-                Configure monitoring frequency and notification preferences.
+            
+            <!-- Current Settings Display -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Current Schedule</h5>
+                        </div>
+                        <div class="card-body" id="currentScheduleInfo">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Job Status</h5>
+                        </div>
+                        <div class="card-body" id="jobStatusInfo">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Update Form -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Update Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <form id="schedulerSettingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="intervalValue" class="form-label">Check Every</label>
+                                <input type="number" class="form-control" id="intervalValue" 
+                                       min="1" max="9999" required>
+                                <div class="form-text">Enter a positive number</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="intervalUnit" class="form-label">Time Unit</label>
+                                <select class="form-select" id="intervalUnit" required>
+                                    <option value="">Select unit...</option>
+                                    <option value="seconds">Seconds</option>
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                    <option value="days">Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Important:</strong> The system waits 15 seconds between checking each email to respect API rate limits. Very frequent checks may not provide significant benefits.
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary me-2">Update Schedule</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="loadSchedulerSettings()">Refresh Status</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -237,10 +305,20 @@ $(document).ready(function() {
         loadBreaches();
     });
 
+    $('#settings-tab').on('shown.bs.tab', function() {
+        loadSchedulerSettings();
+    });
+
     // Add email form submission
     $('#addEmailForm').on('submit', function(e) {
         e.preventDefault();
         addEmail();
+    });
+
+    // Scheduler settings form submission
+    $('#schedulerSettingsForm').on('submit', function(e) {
+        e.preventDefault();
+        updateSchedulerSettings();
     });
 
     function getAuthHeaders() {
@@ -552,6 +630,153 @@ $(document).ready(function() {
         cardBody.on('hidden.bs.collapse', function() {
             chevron.removeClass('bi-chevron-up').addClass('bi-chevron-down');
         });
+    };
+
+    function loadSchedulerSettings() {
+        loadCurrentSettings();
+        loadJobStatus();
+    }
+
+    function loadCurrentSettings() {
+        $.ajax({
+            url: '/api/scheduler/settings',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayCurrentSettings(response.data);
+                } else {
+                    $('#currentScheduleInfo').html('<div class="text-danger">Failed to load settings</div>');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    $('#currentScheduleInfo').html('<div class="text-danger">Failed to load settings</div>');
+                }
+            }
+        });
+    }
+
+    function loadJobStatus() {
+        $.ajax({
+            url: '/api/scheduler/status',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayJobStatus(response.data.jobs);
+                } else {
+                    $('#jobStatusInfo').html('<div class="text-danger">Failed to load job status</div>');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    $('#jobStatusInfo').html('<div class="text-danger">Failed to load job status</div>');
+                }
+            }
+        });
+    }
+
+    function displayCurrentSettings(settings) {
+        const currentScheduleInfo = $('#currentScheduleInfo');
+        
+        // Populate form with current values
+        $('#intervalValue').val(settings.interval_value);
+        $('#intervalUnit').val(settings.interval_unit);
+        
+        currentScheduleInfo.html(`
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Frequency:</span>
+                <span class="badge bg-primary">${settings.interval_value} ${settings.interval_unit}</span>
+            </div>
+            <div class="text-muted small">
+                The system checks for new breaches every ${settings.interval_value} ${settings.interval_unit}.
+            </div>
+        `);
+    }
+
+    function displayJobStatus(jobs) {
+        const jobStatusInfo = $('#jobStatusInfo');
+        
+        if (jobs.length === 0) {
+            jobStatusInfo.html('<div class="text-warning">No scheduled jobs found</div>');
+            return;
+        }
+
+        const job = jobs[0]; // Assuming we're interested in the first job
+        const nextRunTime = job.next_run_time ? new Date(job.next_run_time).toLocaleString() : 'Not scheduled';
+        
+        jobStatusInfo.html(`
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Status:</span>
+                <span class="badge bg-success">Active</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Job Name:</span>
+                <span>${job.name || job.id}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Next Run:</span>
+                <span class="text-muted small">${nextRunTime}</span>
+            </div>
+        `);
+    }
+
+    function updateSchedulerSettings() {
+        const intervalValue = parseInt($('#intervalValue').val());
+        const intervalUnit = $('#intervalUnit').val();
+
+        if (!intervalValue || intervalValue <= 0) {
+            showAlert('warning', 'Please enter a valid interval value (positive number).');
+            return;
+        }
+
+        if (!intervalUnit) {
+            showAlert('warning', 'Please select a time unit.');
+            return;
+        }
+
+        const data = {
+            interval_value: intervalValue,
+            interval_unit: intervalUnit
+        };
+
+        $.ajax({
+            url: '/api/scheduler/settings',
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            data: JSON.stringify(data),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    // Reload the settings to show updated values
+                    setTimeout(() => {
+                        loadSchedulerSettings();
+                    }, 1000);
+                } else {
+                    showAlert('danger', response.message || 'Failed to update settings');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else if (xhr.status === 422) {
+                    showAlert('danger', 'Invalid settings format. Please check your input.');
+                } else {
+                    showAlert('danger', 'Failed to update scheduler settings. Please try again.');
+                }
+            }
+        });
+    }
+
+    // Global function to reload scheduler settings
+    window.loadSchedulerSettings = function() {
+        loadCurrentSettings();
+        loadJobStatus();
     };
 
     function showAlert(type, message) {
