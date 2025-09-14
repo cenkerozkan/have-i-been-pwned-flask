@@ -1,0 +1,77 @@
+<!-- Settings Tab -->
+<div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+    <h3>Scheduler Settings</h3>
+    <p>Configure how frequently the system checks for new breaches.</p>
+    
+    <!-- Current Settings Display -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Current Schedule</h5>
+                </div>
+                <div class="card-body" id="currentScheduleInfo">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Job Status</h5>
+                </div>
+                <div class="card-body" id="jobStatusInfo">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Update Form -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Update Schedule</h5>
+        </div>
+        <div class="card-body">
+            <form id="schedulerSettingsForm">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="intervalValue" class="form-label">Check Every</label>
+                        <input type="number" class="form-control" id="intervalValue" 
+                               min="1" max="9999" required>
+                        <div class="form-text">Enter a positive number</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="intervalUnit" class="form-label">Time Unit</label>
+                        <select class="form-select" id="intervalUnit" required>
+                            <option value="">Select unit...</option>
+                            <option value="seconds">Seconds</option>
+                            <option value="minutes">Minutes</option>
+                            <option value="hours">Hours</option>
+                            <option value="days">Days</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Important:</strong> The system waits 15 seconds between checking each email to respect API rate limits. Very frequent checks may not provide significant benefits.
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Update Schedule</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="loadSchedulerSettings()">Refresh Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
