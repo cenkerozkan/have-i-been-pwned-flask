@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Have I Been Pwned{% endblock %}
+
+{% block extra_css %}
+<!-- Dashboard Styles -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/emails.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/breaches.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header with Logout -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Have I Been Pwned - Dashboard</h1>
+        <button type="button" class="btn btn-outline-danger logout-btn" onclick="logout()">
+            Logout
+        </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    {% include 'components/navigation.html' %}
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        {% include 'components/emails_tab.html' %}
+        {% include 'components/breaches_tab.html' %}
+        {% include 'components/settings_tab.html' %}
+    </div>
+
+    <!-- Alert for messages -->
+    <div class="alert" role="alert" style="display: none; margin-top: 20px;"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Dashboard Scripts -->
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/emails.js') }}"></script>
+<script src="{{ url_for('static', filename='js/breaches.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

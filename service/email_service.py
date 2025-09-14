@@ -68,6 +68,32 @@ class EmailService:
 
         return result
 
+    def delete_one_by_id(self, email_id: int) -> Dict[str, Any]:
+        result: Dict[str, Any] = {
+            "success": False,
+            "message": "",
+            "data": {},
+            "error": "",
+        }
+
+        try:
+            deleted: bool = self._db.delete_one_by_id(email_id)
+
+            if deleted:
+                result["success"] = True
+                result["message"] = "Successfully deleted email"
+            else:
+                result["success"] = False
+                result["message"] = "Email not found or failed to delete"
+
+        except Exception as e:
+            result["success"] = False
+            result["message"] = "Failed to delete email"
+            result["error"] = str(e)
+            self._logger.error(f"Failed to delete email: {str(e)}")
+
+        return result
+
     def create_email(self, new_email_data: NewEmailModel) -> Dict[str, Any]:
         result: Dict[str, Any] = {
             "success": False,

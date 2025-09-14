@@ -2,20 +2,20 @@
 Email Routes Module
 
 This module implements RESTful API endpoints for email management.
-The routes intentionally use empty path strings with the base URL prefix '/api/email'
-following RESTful conventions:
+The routes follow RESTful conventions with the base URL prefix '/api/email':
 
-- GET /api/email    - Retrieve all emails (collection)
-- POST /api/email   - Create a new email (add to collection)
-- DELETE /api/email - Delete all emails (clear collection)
+- GET /api/email        - Retrieve all emails (collection)
+- POST /api/email       - Create a new email (add to collection)
+- DELETE /api/email/<id> - Delete a specific email by ID
+- DELETE /api/email/all - Delete all emails (clear collection)
 
 This approach follows REST principles where:
 1. The resource name is in the URL prefix
 2. HTTP methods determine the action (GET, POST, DELETE)
-3. Operations apply to the entire resource collection
+3. Operations can apply to collections or individual resources
 """
 
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, json
 from flask_jwt_extended import jwt_required
 from pydantic import ValidationError
 
@@ -39,7 +39,7 @@ def get_all_emails() -> Response:
         result: Dict[str, Any] = email_service.get_all_emails()
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -53,7 +53,7 @@ def get_all_emails() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -66,15 +66,15 @@ def get_all_emails() -> Response:
         )
 
 
-@email_routes_blueprint.route("", methods=["DELETE"])
+@email_routes_blueprint.route("/<int:email_id>", methods=["DELETE"])
 @jwt_required()
-def delete_all_emails() -> Response:
-    logger.info("DELETE /api/email - Deleting all emails")
+def delete_email_by_id(email_id: int) -> Response:
+    logger.info(f"DELETE /api/email/{email_id} - Deleting email by ID")
     try:
-        result: Dict[str, Any] = email_service.delete_all_emails()
+        result: Dict[str, Any] = email_service.delete_one_by_id(email_id)
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -88,7 +88,42 @@ def delete_all_emails() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
+                ResponseModel(
+                    success=False,
+                    message="An unknown error occurred.",
+                    data=None,
+                    error=str(e),
+                ).model_dump()
+            ),
+            status=500,
+            mimetype="application/json",
+        )
+
+
+@email_routes_blueprint.route("/all", methods=["DELETE"])
+@jwt_required()
+def delete_all_emails() -> Response:
+    logger.info("DELETE /api/email/all - Deleting all emails")
+    try:
+        result: Dict[str, Any] = email_service.delete_all_emails()
+
+        return Response(
+            response=json.dumps(
+                ResponseModel(
+                    success=result.get("success"),
+                    message=result.get("message"),
+                    data=result.get("data"),
+                    error=result.get("error"),
+                ).model_dump()
+            ),
+            status=200 if result.get("success") else 400,
+            mimetype="application/json",
+        )
+
+    except Exception as e:
+        return Response(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",
@@ -110,7 +145,7 @@ def create_email() -> Response:
         result: Dict[str, Any] = email_service.create_email(new_email)
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -124,7 +159,7 @@ def create_email() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -135,7 +170,7 @@ def create_email() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",

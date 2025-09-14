@@ -1,4 +1,4 @@
-from flask import Blueprint, request, Response
+from flask import Blueprint, request, Response, json
 from pydantic import ValidationError
 from flask_jwt_extended import jwt_required
 from service.scheduler_settings_service import SchedulerSettingsService
@@ -18,7 +18,7 @@ def get_settings() -> Response:
     result: Dict[str, Any] = settings_service.get_pwn_check_settings()
 
     return Response(
-        response=str(
+        response=json.dumps(
             ResponseModel(
                 success=result.get("success"),
                 message=result.get("message"),
@@ -37,7 +37,7 @@ def get_status() -> Response:
     result: Dict[str, Any] = settings_service.get_scheduler_status()
 
     return Response(
-        response=str(
+        response=json.dumps(
             ResponseModel(
                 success=result.get("success"),
                 message=result.get("message"),
@@ -62,7 +62,7 @@ def update_settings() -> Response:
         )
 
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=result.get("success"),
                     message=result.get("message"),
@@ -76,7 +76,7 @@ def update_settings() -> Response:
 
     except ValidationError as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False, message="Wrong JSON Format!", data=None, error=str(e)
                 ).model_dump()
@@ -87,7 +87,7 @@ def update_settings() -> Response:
 
     except Exception as e:
         return Response(
-            response=str(
+            response=json.dumps(
                 ResponseModel(
                     success=False,
                     message="An unknown error occurred.",

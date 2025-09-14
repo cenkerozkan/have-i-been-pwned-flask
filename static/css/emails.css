@@ -1,0 +1,22 @@
+/* Email Tab Specific Styles */
+.email-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+}
+
+.email-text {
+    font-weight: 500;
+}
+
+.add-email-form {
+    background-color: #f1f3f4;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}

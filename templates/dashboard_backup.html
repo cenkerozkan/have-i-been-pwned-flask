@@ -1,0 +1,798 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Have I Been Pwned{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        margin: 20px;
+    }
+    .nav-tabs .nav-link.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+    }
+    .tab-content {
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 20px;
+        min-height: 400px;
+    }
+    .email-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+    }
+    .email-text {
+        font-weight: 500;
+    }
+    .add-email-form {
+        background-color: #f1f3f4;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .logout-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+    }
+    .breach-card {
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+    .breach-card-header {
+        background-color: #f8f9fa;
+        padding: 15px;
+        cursor: pointer;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .breach-card-header:hover {
+        background-color: #e9ecef;
+    }
+    .breach-card-body {
+        padding: 0;
+    }
+    .breach-item {
+        padding: 15px;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    .breach-item:last-child {
+        border-bottom: none;
+    }
+    .breach-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .breach-title {
+        font-weight: 600;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+    }
+    .breach-date {
+        color: #6c757d;
+        font-size: 0.9em;
+    }
+    .breach-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    .breach-verified {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .breach-unverified {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    .breach-description {
+        margin: 10px 0;
+        color: #495057;
+    }
+    .data-classes {
+        margin-top: 10px;
+    }
+    .data-class-tag {
+        display: inline-block;
+        background-color: #e7f3ff;
+        color: #0066cc;
+        padding: 2px 6px;
+        margin: 2px;
+        border-radius: 3px;
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header with Logout -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Have I Been Pwned - Dashboard</h1>
+        <button type="button" class="btn btn-outline-danger logout-btn" onclick="logout()">
+            Logout
+        </button>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="emails-tab" data-bs-toggle="tab" data-bs-target="#emails" 
+                    type="button" role="tab" aria-controls="emails" aria-selected="true">
+                Emails
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="breaches-tab" data-bs-toggle="tab" data-bs-target="#breaches" 
+                    type="button" role="tab" aria-controls="breaches" aria-selected="false">
+                Breaches
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" 
+                    type="button" role="tab" aria-controls="settings" aria-selected="false">
+                Settings
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content" id="dashboardTabsContent">
+        <!-- Emails Tab -->
+        <div class="tab-pane fade show active" id="emails" role="tabpanel" aria-labelledby="emails-tab">
+            <h3>Email Management</h3>
+            
+            <!-- Add Email Form -->
+            <div class="add-email-form">
+                <h5>Add New Email</h5>
+                <form id="addEmailForm">
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="newEmailInput" 
+                               placeholder="Enter email address" required>
+                        <button type="submit" class="btn btn-primary">Add Email</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Email List Header -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5>Your Monitored Emails</h5>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteAllBtn" 
+                        onclick="deleteAllEmails()" style="display: none;">
+                    Delete All Emails
+                </button>
+            </div>
+
+            <!-- Email List -->
+            <div id="emailList">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Breaches Tab -->
+        <div class="tab-pane fade" id="breaches" role="tabpanel" aria-labelledby="breaches-tab">
+            <h3>Security Breaches</h3>
+            <p>Data breaches detected for your monitored email addresses.</p>
+            
+            <!-- Breaches Content -->
+            <div id="breachesContent">
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading breaches...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+            <h3>Scheduler Settings</h3>
+            <p>Configure how frequently the system checks for new breaches.</p>
+            
+            <!-- Current Settings Display -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Current Schedule</h5>
+                        </div>
+                        <div class="card-body" id="currentScheduleInfo">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Job Status</h5>
+                        </div>
+                        <div class="card-body" id="jobStatusInfo">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Update Form -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Update Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <form id="schedulerSettingsForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="intervalValue" class="form-label">Check Every</label>
+                                <input type="number" class="form-control" id="intervalValue" 
+                                       min="1" max="9999" required>
+                                <div class="form-text">Enter a positive number</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="intervalUnit" class="form-label">Time Unit</label>
+                                <select class="form-select" id="intervalUnit" required>
+                                    <option value="">Select unit...</option>
+                                    <option value="seconds">Seconds</option>
+                                    <option value="minutes">Minutes</option>
+                                    <option value="hours">Hours</option>
+                                    <option value="days">Days</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Important:</strong> The system waits 15 seconds between checking each email to respect API rate limits. Very frequent checks may not provide significant benefits.
+                        </div>
+
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary me-2">Update Schedule</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="loadSchedulerSettings()">Refresh Status</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert for messages -->
+    <div class="alert" role="alert" style="display: none; margin-top: 20px;"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Check if user is authenticated
+    const token = localStorage.getItem('jwt_token');
+    if (!token) {
+        // No token found, redirect to login
+        window.location.href = '/api/user/login-page';
+        return;
+    }
+
+    // Load emails when page loads and when emails tab is shown
+    loadEmails();
+    
+    $('#emails-tab').on('shown.bs.tab', function() {
+        loadEmails();
+    });
+
+    $('#breaches-tab').on('shown.bs.tab', function() {
+        loadBreaches();
+    });
+
+    $('#settings-tab').on('shown.bs.tab', function() {
+        loadSchedulerSettings();
+    });
+
+    // Add email form submission
+    $('#addEmailForm').on('submit', function(e) {
+        e.preventDefault();
+        addEmail();
+    });
+
+    // Scheduler settings form submission
+    $('#schedulerSettingsForm').on('submit', function(e) {
+        e.preventDefault();
+        updateSchedulerSettings();
+    });
+
+    function getAuthHeaders() {
+        const token = localStorage.getItem('jwt_token');
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function loadEmails() {
+        $.ajax({
+            url: '/api/email',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayEmails(response.data.emails);
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                    setTimeout(() => {
+                        window.location.href = '/api/user/login-page';
+                    }, 2000);
+                } else {
+                    showAlert('danger', 'Failed to load emails. Please try again.');
+                }
+            }
+        });
+    }
+
+    function displayEmails(emails) {
+        const emailList = $('#emailList');
+        const deleteAllBtn = $('#deleteAllBtn');
+        
+        if (emails.length === 0) {
+            emailList.html('<div class="alert alert-info">No emails added yet. Add your first email above!</div>');
+            deleteAllBtn.hide();
+            return;
+        }
+
+        // Show delete all button when there are emails
+        deleteAllBtn.show();
+
+        let emailsHtml = '';
+        emails.forEach(email => {
+            emailsHtml += `
+                <div class="email-item" data-email-id="${email.id}">
+                    <span class="email-text">${email.email}</span>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteEmail(${email.id})">
+                        Delete
+                    </button>
+                </div>
+            `;
+        });
+        
+        emailList.html(emailsHtml);
+    }
+
+    function addEmail() {
+        const emailInput = $('#newEmailInput');
+        const email = emailInput.val().trim();
+        
+        if (!email) {
+            showAlert('warning', 'Please enter a valid email address.');
+            return;
+        }
+
+        $.ajax({
+            url: '/api/email',
+            method: 'POST',
+            headers: getAuthHeaders(),
+            data: JSON.stringify({ email: email }),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    emailInput.val(''); // Clear input
+                    loadEmails(); // Reload email list
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    showAlert('danger', 'Failed to add email. Please try again.');
+                }
+            }
+        });
+    }
+
+    // Global function for deleting emails
+    window.deleteEmail = function(emailId) {
+        if (!confirm('Are you sure you want to delete this email?')) {
+            return;
+        }
+
+        $.ajax({
+            url: `/api/email/${emailId}`,
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    loadEmails(); // Reload email list
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    showAlert('danger', 'Failed to delete email. Please try again.');
+                }
+            }
+        });
+    };
+
+    // Global function for deleting all emails
+    window.deleteAllEmails = function() {
+        if (!confirm('Are you sure you want to delete ALL emails? This action cannot be undone.')) {
+            return;
+        }
+
+        $.ajax({
+            url: '/api/email/all',
+            method: 'DELETE',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    loadEmails(); // Reload email list
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    showAlert('danger', 'Failed to delete all emails. Please try again.');
+                }
+            }
+        });
+    };
+
+    // Global logout function
+    window.logout = function() {
+        localStorage.removeItem('jwt_token');
+        window.location.href = '/api/user/login-page';
+    };
+
+    function loadBreaches() {
+        $.ajax({
+            url: '/api/pwned_platforms',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayBreaches(response.data.platforms);
+                } else {
+                    showAlert('danger', response.message);
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                    setTimeout(() => {
+                        window.location.href = '/api/user/login-page';
+                    }, 2000);
+                } else {
+                    showAlert('danger', 'Failed to load breaches. Please try again.');
+                }
+            }
+        });
+    }
+
+    function displayBreaches(platforms) {
+        const breachesContent = $('#breachesContent');
+        
+        if (platforms.length === 0) {
+            breachesContent.html(`
+                <div class="alert alert-success">
+                    <h5>Good news!</h5>
+                    <p>No security breaches found for your monitored email addresses.</p>
+                </div>
+            `);
+            return;
+        }
+
+        // Group breaches by email_id
+        const breachesByEmail = {};
+        platforms.forEach(breach => {
+            if (!breachesByEmail[breach.email_id]) {
+                breachesByEmail[breach.email_id] = [];
+            }
+            breachesByEmail[breach.email_id].push(breach);
+        });
+
+        // We need to get email information to display email addresses
+        // For now, we'll show by email_id and load emails to map them
+        loadEmailsForBreaches(breachesByEmail);
+    }
+
+    function loadEmailsForBreaches(breachesByEmail) {
+        $.ajax({
+            url: '/api/email',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayBreachesGrouped(breachesByEmail, response.data.emails);
+                } else {
+                    $('#breachesContent').html('<div class="alert alert-danger">Failed to load email information</div>');
+                }
+            },
+            error: function(xhr) {
+                $('#breachesContent').html('<div class="alert alert-danger">Failed to load email information</div>');
+            }
+        });
+    }
+
+    function displayBreachesGrouped(breachesByEmail, emails) {
+        const breachesContent = $('#breachesContent');
+        
+        // Create email lookup map
+        const emailMap = {};
+        emails.forEach(email => {
+            emailMap[email.id] = email.email;
+        });
+
+        let breachesHtml = '';
+        
+        Object.keys(breachesByEmail).forEach(emailId => {
+            const emailAddress = emailMap[emailId] || `Email ID: ${emailId}`;
+            const breaches = breachesByEmail[emailId];
+            const breachCount = breaches.length;
+            
+            breachesHtml += `
+                <div class="breach-card">
+                    <div class="breach-card-header" onclick="toggleBreachCard(${emailId})">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>${emailAddress}</strong>
+                                <span class="text-muted ms-2">(${breachCount} breach${breachCount !== 1 ? 'es' : ''})</span>
+                            </div>
+                            <i class="bi bi-chevron-down" id="chevron-${emailId}"></i>
+                        </div>
+                    </div>
+                    <div class="breach-card-body collapse" id="breaches-${emailId}">
+            `;
+            
+            breaches.forEach(breach => {
+                const verificationStatus = breach.is_verified ? 'verified' : 'unverified';
+                const verificationText = breach.is_verified ? 'Verified' : 'Unverified';
+                const breachDate = new Date(breach.breach_date).toLocaleDateString();
+                
+                breachesHtml += `
+                    <div class="breach-item">
+                        <div class="breach-header">
+                            <div class="flex-grow-1">
+                                <div class="breach-title">${breach.title || breach.name}</div>
+                                <div class="breach-date">Breach Date: ${breachDate}</div>
+                            </div>
+                            <span class="breach-status breach-${verificationStatus}">${verificationText}</span>
+                        </div>
+                        
+                        ${breach.description ? `<div class="breach-description">${breach.description}</div>` : ''}
+                        
+                        <div class="data-classes">
+                            <strong>Compromised Data:</strong><br>
+                            <div class="mt-1">
+                                ${breach.data_classes && breach.data_classes.length > 0 
+                                    ? breach.data_classes.map(dc => `<span class="data-class-tag">${dc}</span>`).join('') 
+                                    : '<span class="text-muted">No data classification available</span>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            breachesHtml += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        breachesContent.html(breachesHtml);
+    }
+
+    // Global function to toggle breach cards
+    window.toggleBreachCard = function(emailId) {
+        const cardBody = $(`#breaches-${emailId}`);
+        const chevron = $(`#chevron-${emailId}`);
+        
+        cardBody.collapse('toggle');
+        
+        cardBody.on('shown.bs.collapse', function() {
+            chevron.removeClass('bi-chevron-down').addClass('bi-chevron-up');
+        });
+        
+        cardBody.on('hidden.bs.collapse', function() {
+            chevron.removeClass('bi-chevron-up').addClass('bi-chevron-down');
+        });
+    };
+
+    function loadSchedulerSettings() {
+        loadCurrentSettings();
+        loadJobStatus();
+    }
+
+    function loadCurrentSettings() {
+        $.ajax({
+            url: '/api/scheduler/settings',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayCurrentSettings(response.data);
+                } else {
+                    $('#currentScheduleInfo').html('<div class="text-danger">Failed to load settings</div>');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    $('#currentScheduleInfo').html('<div class="text-danger">Failed to load settings</div>');
+                }
+            }
+        });
+    }
+
+    function loadJobStatus() {
+        $.ajax({
+            url: '/api/scheduler/status',
+            method: 'GET',
+            headers: getAuthHeaders(),
+            success: function(response) {
+                if (response.success) {
+                    displayJobStatus(response.data.jobs);
+                } else {
+                    $('#jobStatusInfo').html('<div class="text-danger">Failed to load job status</div>');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else {
+                    $('#jobStatusInfo').html('<div class="text-danger">Failed to load job status</div>');
+                }
+            }
+        });
+    }
+
+    function displayCurrentSettings(settings) {
+        const currentScheduleInfo = $('#currentScheduleInfo');
+        
+        // Populate form with current values
+        $('#intervalValue').val(settings.interval_value);
+        $('#intervalUnit').val(settings.interval_unit);
+        
+        currentScheduleInfo.html(`
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Frequency:</span>
+                <span class="badge bg-primary">${settings.interval_value} ${settings.interval_unit}</span>
+            </div>
+            <div class="text-muted small">
+                The system checks for new breaches every ${settings.interval_value} ${settings.interval_unit}.
+            </div>
+        `);
+    }
+
+    function displayJobStatus(jobs) {
+        const jobStatusInfo = $('#jobStatusInfo');
+        
+        if (jobs.length === 0) {
+            jobStatusInfo.html('<div class="text-warning">No scheduled jobs found</div>');
+            return;
+        }
+
+        const job = jobs[0]; // Assuming we're interested in the first job
+        const nextRunTime = job.next_run_time ? new Date(job.next_run_time).toLocaleString() : 'Not scheduled';
+        
+        jobStatusInfo.html(`
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Status:</span>
+                <span class="badge bg-success">Active</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Job Name:</span>
+                <span>${job.name || job.id}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Next Run:</span>
+                <span class="text-muted small">${nextRunTime}</span>
+            </div>
+        `);
+    }
+
+    function updateSchedulerSettings() {
+        const intervalValue = parseInt($('#intervalValue').val());
+        const intervalUnit = $('#intervalUnit').val();
+
+        if (!intervalValue || intervalValue <= 0) {
+            showAlert('warning', 'Please enter a valid interval value (positive number).');
+            return;
+        }
+
+        if (!intervalUnit) {
+            showAlert('warning', 'Please select a time unit.');
+            return;
+        }
+
+        const data = {
+            interval_value: intervalValue,
+            interval_unit: intervalUnit
+        };
+
+        $.ajax({
+            url: '/api/scheduler/settings',
+            method: 'PUT',
+            headers: getAuthHeaders(),
+            data: JSON.stringify(data),
+            success: function(response) {
+                if (response.success) {
+                    showAlert('success', response.message);
+                    // Reload the settings to show updated values
+                    setTimeout(() => {
+                        loadSchedulerSettings();
+                    }, 1000);
+                } else {
+                    showAlert('danger', response.message || 'Failed to update settings');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401) {
+                    showAlert('danger', 'Session expired. Please login again.');
+                } else if (xhr.status === 422) {
+                    showAlert('danger', 'Invalid settings format. Please check your input.');
+                } else {
+                    showAlert('danger', 'Failed to update scheduler settings. Please try again.');
+                }
+            }
+        });
+    }
+
+    // Global function to reload scheduler settings
+    window.loadSchedulerSettings = function() {
+        loadCurrentSettings();
+        loadJobStatus();
+    };
+
+    function showAlert(type, message) {
+        const alert = $('.alert').last();
+        alert.removeClass('alert-success alert-danger alert-warning alert-info')
+             .addClass(`alert-${type}`)
+             .text(message)
+             .show();
+        
+        // Auto-hide success/info messages after 3 seconds
+        if (type === 'success' || type === 'info') {
+            setTimeout(() => {
+                alert.fadeOut();
+            }, 3000);
+        }
+    }
+});
+</script>
+{% endblock %}
