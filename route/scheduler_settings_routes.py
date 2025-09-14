@@ -18,7 +18,7 @@ def get_settings() -> Response:
     result: Dict[str, Any] = settings_service.get_pwn_check_settings()
 
     return Response(
-        response=str(
+        response=json.dumps(
             ResponseModel(
                 success=result.get("success"),
                 message=result.get("message"),
@@ -37,7 +37,7 @@ def get_status() -> Response:
     result: Dict[str, Any] = settings_service.get_scheduler_status()
 
     return Response(
-        response=str(
+        response=json.dumps(
             ResponseModel(
                 success=result.get("success"),
                 message=result.get("message"),

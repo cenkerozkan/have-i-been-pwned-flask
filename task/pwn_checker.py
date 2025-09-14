@@ -19,7 +19,7 @@ class PwnChecker:
         self._email_repository = EmailRepository()
         self._pwned_platform_repository = PwnedPlatformRepository()
         self._notification_service = NotificationService()
-        self._rate_limit_wait_time: int = 120
+        self._rate_limit_wait_time: int = 15
 
     def _get_all_emails(self) -> List[Email]:
         return self._email_repository.get_all()

@@ -62,5 +62,6 @@ class PwnedPlatform(db.Model):
             "added_date": self.added_date.isoformat() if self.added_date else None,
             "description": self.description,
             "is_verified": self.is_verified,
+            "data_classes": self.data_classes,  # Include data_classes property
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
